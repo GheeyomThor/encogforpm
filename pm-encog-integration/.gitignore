@@ -1,0 +1,10 @@
+/.gradle/
+/bin/
+/build/
+
+*.EG
+*.csv
+
+.classpath
+.project
+.settings/
