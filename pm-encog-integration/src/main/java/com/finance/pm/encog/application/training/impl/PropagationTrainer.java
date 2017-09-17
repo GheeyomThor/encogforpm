@@ -31,7 +31,8 @@ public class PropagationTrainer implements NnTrainer {
 
     public File train(MLMethod network, MLDataSet trainingSet) {
 
-        MLTrain mlTrain = propagationTrainerFactory.create(network, trainingSet);
+        //Propagation type is not necessary here as it is inferred by injection of the propagation implementation
+        MLTrain mlTrain = propagationTrainerFactory.create(network, trainingSet, null);
 
         int epoch = 1;
         do {

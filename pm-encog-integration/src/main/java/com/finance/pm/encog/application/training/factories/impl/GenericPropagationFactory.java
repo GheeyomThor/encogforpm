@@ -15,16 +15,15 @@ import com.finance.pm.encog.application.training.factories.PropagationFactory;
 
 /**
  * Generic propagation training method wrapper for Encog {@link MLTrainFactory}
- * TODO To generalise outside ResilientPropagation and TemporalDataSet
  */
 public class GenericPropagationFactory implements PropagationFactory {
 
     @Override
-    public MLTrain create(MLMethod network, MLDataSet dataSet, String... args) {
+    public MLTrain create(MLMethod network, MLDataSet dataSet, String propagationType, String... args) {
 
         MLTrainFactory trainFactory = new MLTrainFactory();
         String argString = Arrays.stream(args).collect(Collectors.joining(","));
-        MLTrain mlTrain = trainFactory.create(network, dataSet, MLTrainFactory.TYPE_RPROP, argString);
+        MLTrain mlTrain = trainFactory.create(network, dataSet, propagationType, argString);
 
         if (network instanceof MLResettable && !(mlTrain instanceof ManhattanPropagation)) {
             mlTrain.addStrategy(new RequiredImprovementStrategy(500));

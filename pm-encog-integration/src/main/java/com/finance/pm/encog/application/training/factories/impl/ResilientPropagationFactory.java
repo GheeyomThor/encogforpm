@@ -15,9 +15,12 @@ import com.finance.pm.encog.application.training.factories.PropagationFactory;
  */
 public class ResilientPropagationFactory implements PropagationFactory {
 
-    public Propagation create(MLMethod network, MLDataSet dataSet, String... args) {
+    @Override
+    public Propagation create(MLMethod network, MLDataSet dataSet, String propagationType, String... args) {
+
         ResilientPropagation resilientPropagation = new ResilientPropagation((ContainsFlat) network, dataSet);
         resilientPropagation.setRPROPType(RPROPType.iRPROPp);
+
         return resilientPropagation;
     }
 
