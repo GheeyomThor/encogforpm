@@ -31,8 +31,7 @@ public class Main {
 
         // export prediction
         CsvImportExport<MLDataPair> csvImportExport = injector
-                .getInstance(Key.get(new TypeLiteral<CsvImportExport<MLDataPair>>() {
-                }));
+                .getInstance(Key.get(new TypeLiteral<CsvImportExport<MLDataPair>>() {}));
         csvImportExport.exportData(
                 new File(System.getProperty("user.dir") + File.separator + UUID.randomUUID() + ".csv"), prediction);
 

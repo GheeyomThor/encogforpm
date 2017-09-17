@@ -29,10 +29,8 @@ public class EncogServiceModule extends AbstractModule {
     protected void configure() {
 
         bind(DataImporter.class).to(TemporalDataSetImporter.class);
-        bind(new TypeLiteral<CsvImportExport<MLDataPair>>() {
-        }).to(MLDataPairCsvImportExport.class);
-        bind(new TypeLiteral<CsvImportExport<Date>>() {
-        }).to(MapCsvImportExport.class);
+        bind(new TypeLiteral<CsvImportExport<MLDataPair>>() {}).to(MLDataPairCsvImportExport.class);
+        bind(new TypeLiteral<CsvImportExport<Date>>() {}).to(MapCsvImportExport.class);
 
         bind(PropagationFactory.class).to(ResilientPropagationFactory.class);
         bind(NnFactory.class).to(GenericFeedForwardNetworkFactory.class);
@@ -41,7 +39,7 @@ public class EncogServiceModule extends AbstractModule {
 
         bind(NnPredictor.class).to(GenericPredictor.class);
 
-        // bind(CrossValidator.class).to(VersatileSetCrossValidator.class);
+        //bind(CrossValidator.class).to(VersatileSetCrossValidator.class);
 
     }
 

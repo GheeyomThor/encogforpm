@@ -53,8 +53,8 @@ public class EncogService {
      * @return The predicted output
      * @throws Exception
      */
-    public LinkedHashMap<MLDataPair, double[]> oneFoldTrainAndCompute(String architecture, int inputSize,
-            int lagWindowSize) throws Exception {
+    public LinkedHashMap<MLDataPair, double[]> oneFoldTrainAndCompute(
+            String architecture, int inputSize, int lagWindowSize) throws Exception {
 
         LOGGER.info("Creating network");
         MLMethod network = networkFactory.create(architecture, inputSize, 1);
