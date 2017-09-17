@@ -4,13 +4,13 @@ import java.util.Date;
 
 import org.encog.ml.data.MLDataPair;
 
-import com.finance.pm.encog.application.nnetwork.factories.NnFactory;
-import com.finance.pm.encog.application.nnetwork.factories.impl.GenericFeedForwardNetworkFactory;
+import com.finance.pm.encog.application.nnetwork.propagation.PropagationFactory;
+import com.finance.pm.encog.application.nnetwork.propagation.impl.ResilientPropagationFactory;
+import com.finance.pm.encog.application.nnetwork.topology.NnFactory;
+import com.finance.pm.encog.application.nnetwork.topology.impl.GenericFeedForwardNetworkFactory;
 import com.finance.pm.encog.application.prediction.NnPredictor;
 import com.finance.pm.encog.application.prediction.impl.GenericPredictor;
 import com.finance.pm.encog.application.training.NnTrainer;
-import com.finance.pm.encog.application.training.factories.PropagationFactory;
-import com.finance.pm.encog.application.training.factories.impl.ResilientPropagationFactory;
 import com.finance.pm.encog.application.training.impl.PropagationTrainer;
 import com.finance.pm.encog.data.DataImporter;
 import com.finance.pm.encog.data.impl.TemporalDataSetImporter;

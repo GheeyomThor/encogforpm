@@ -13,8 +13,9 @@ import org.encog.ml.train.MLTrain;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.finance.pm.encog.application.nnetwork.factories.NnFactory;
-import com.finance.pm.encog.application.training.factories.PropagationFactory;
+import com.finance.pm.encog.application.nnetwork.propagation.PropagationFactory;
+import com.finance.pm.encog.application.nnetwork.propagation.impl.GenericPropagationFactory;
+import com.finance.pm.encog.application.nnetwork.topology.NnFactory;
 import com.finance.pm.encog.data.impl.TemporalDataSetImporter;
 import com.finance.pm.encog.guice.EncogServiceModule;
 import com.finance.pm.encog.guice.POCAdapterModule;
@@ -88,6 +89,34 @@ public class PropagationFactoryTest {
         } catch (Exception e) {
             fail(String.format("Should not raise exception %s", e.getMessage()));
         }
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testGenericMissingArgument() throws Exception {
+
+        // Given
+        Injector injector = Guice.createInjector(new POCAdapterModule(),
+                Modules.override(new EncogServiceModule()).with(new AbstractModule() {
+
+                    @Override
+                    protected void configure() {
+                        bind(PropagationFactory.class).to(GenericPropagationFactory.class);
+
+                    }
+
+                }));
+        injector.injectMembers(this);
+
+        MLDataSet dataSet = temporalDataSetImporter.importData(12, 1);
+        MLMethod networkMethod = nnFactory.create("?:B->SIGMOID->25:B->SIGMOID->?", dataSet.getInputSize(),
+                dataSet.getIdealSize());
+
+        // When
+        MLTrain networkTrain = propagationFactory.create(networkMethod, dataSet, null);
+
+        // Then
+        assertEquals(TrainingImplementationType.Iterative, networkTrain.getImplementationType());
+
     }
 
 }

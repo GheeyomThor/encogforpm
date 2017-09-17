@@ -1,11 +1,11 @@
-package com.finance.pm.encog.application.nnetwork.factories;
+package com.finance.pm.encog.application.nnetwork.topology;
 
 import java.util.LinkedList;
 
 import org.encog.ml.MLMethod;
 import org.encog.neural.networks.BasicNetwork;
 
-import com.finance.pm.encog.application.nnetwork.factories.impl.GenericFeedForwardNetworkFactory;
+import com.finance.pm.encog.application.nnetwork.topology.impl.GenericFeedForwardNetworkFactory;
 
 /**
  * 
@@ -32,14 +32,14 @@ public interface NnFactory {
      * @return {@link BasicNetwork}
      * @throws Exception
      */
-    default BasicNetwork create(LinkedList<LayerDescription> topology) throws Exception {
+    default BasicNetwork create(LinkedList<LayerDescription> topology) {
         throw new UnsupportedOperationException();
     }
 
     /**
      * @see GenericFeedForwardNetworkFactory
      */
-    default MLMethod create(String architecture, int inputSize, int outputSize) throws Exception {
+    default MLMethod create(String architecture, int inputSize, int outputSize) {
         throw new UnsupportedOperationException();
     }
 

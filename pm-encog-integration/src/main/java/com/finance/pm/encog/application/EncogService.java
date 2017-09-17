@@ -7,11 +7,13 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 
 import org.encog.Encog;
-import org.encog.ml.MLMethod;
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
+import org.encog.ml.train.MLTrain;
 
-import com.finance.pm.encog.application.nnetwork.factories.NnFactory;
+import com.finance.pm.encog.application.nnetwork.PropagationTrainingMethodBuilder;
+import com.finance.pm.encog.application.nnetwork.propagation.PropagationFactory;
+import com.finance.pm.encog.application.nnetwork.topology.NnFactory;
 import com.finance.pm.encog.application.prediction.NnPredictor;
 import com.finance.pm.encog.application.training.NnTrainer;
 import com.finance.pm.encog.data.DataImporter;
@@ -25,15 +27,17 @@ public class EncogService {
 
     private DataImporter dataImporter;
     private NnFactory networkFactory;
+    private PropagationFactory propagationFactory;
     private NnTrainer trainer;
     private NnPredictor predictor;
 
     @Inject
-    public EncogService(DataImporter dataImporter, NnFactory networkFactory, NnTrainer trainer,
-            NnPredictor predicator) {
+    public EncogService(DataImporter dataImporter, NnFactory networkFactory, PropagationFactory propagationFactory,
+            NnTrainer trainer, NnPredictor predicator) {
         super();
         this.dataImporter = dataImporter;
         this.networkFactory = networkFactory;
+        this.propagationFactory = propagationFactory;
         this.trainer = trainer;
         this.predictor = predicator;
     }
@@ -45,7 +49,7 @@ public class EncogService {
      *            For example "? : B−>SIGMOID−>4:B−>SIGMOID−>?" will create a
      *            neural network.</br>
      *            see
-     *            {@link com.finance.pm.encog.application.nnetwork.factories.impl.GenericFeedForwardNetworkFactory}
+     *            {@link com.finance.pm.encog.application.nnetwork.topology.impl.GenericFeedForwardNetworkFactory}
      * @param inputSize
      *            input layer size. The output layer size is fixed to one.
      * @param lagWindowSize
@@ -59,11 +63,13 @@ public class EncogService {
         LOGGER.info("Importing data");
         MLDataSet trainingSet = dataImporter.importData(lagWindowSize, 1);
 
-        LOGGER.info("Creating network");
-        MLMethod network = networkFactory.create(architecture, trainingSet.getInputSize(), trainingSet.getIdealSize());
+        LOGGER.info("Creating network method and training");
+        MLTrain mlTrain = new PropagationTrainingMethodBuilder().withMethodFactory(networkFactory)
+                .withArchitecture(architecture).withDataSet(trainingSet).withPropagationFactory(propagationFactory)
+                .build();
 
         LOGGER.info("Training network");
-        File trainedEg = trainer.train(network, trainingSet);
+        File trainedEg = trainer.train(mlTrain, trainingSet);
 
         LOGGER.info("Running predictions");
         LinkedHashMap<MLDataPair, double[]> prediction = predictor.compute(trainedEg, trainingSet);

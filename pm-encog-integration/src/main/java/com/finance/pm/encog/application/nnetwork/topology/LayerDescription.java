@@ -1,4 +1,4 @@
-package com.finance.pm.encog.application.nnetwork.factories;
+package com.finance.pm.encog.application.nnetwork.topology;
 
 import org.encog.engine.network.activation.ActivationFunction;
 
@@ -22,8 +22,14 @@ public class LayerDescription {
         return neuronsCount;
     }
 
-    public ActivationFunction getActivationFunction() throws InstantiationException, IllegalAccessException {
-        return activationFunction.newInstance();
+    public ActivationFunction getActivationFunction() {
+        ActivationFunction newInstance;
+        try {
+            newInstance = activationFunction.newInstance();
+            return newInstance;
+        } catch (InstantiationException | IllegalAccessException e) {
+           throw new RuntimeException(e);
+        }
     }
 
 }

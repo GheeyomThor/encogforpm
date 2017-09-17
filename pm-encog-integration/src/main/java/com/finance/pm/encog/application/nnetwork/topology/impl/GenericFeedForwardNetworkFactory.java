@@ -1,9 +1,9 @@
-package com.finance.pm.encog.application.nnetwork.factories.impl;
+package com.finance.pm.encog.application.nnetwork.topology.impl;
 
 import org.encog.ml.MLMethod;
 import org.encog.ml.factory.MLMethodFactory;
 
-import com.finance.pm.encog.application.nnetwork.factories.NnFactory;
+import com.finance.pm.encog.application.nnetwork.topology.NnFactory;
 
 /**
  * Generic wrapper around {@link MLMethodFactory} </br>
@@ -28,7 +28,7 @@ public class GenericFeedForwardNetworkFactory implements NnFactory {
      *            specified in the create call will be ignored.
      */
     @Override
-    public MLMethod create(String architecture, int inputSize, int outputSize) throws Exception {
+    public MLMethod create(String architecture, int inputSize, int outputSize) {
 
         MLMethodFactory methodFactory = new MLMethodFactory();
         MLMethod network = methodFactory.create(MLMethodFactory.TYPE_FEEDFORWARD, architecture, inputSize, outputSize);

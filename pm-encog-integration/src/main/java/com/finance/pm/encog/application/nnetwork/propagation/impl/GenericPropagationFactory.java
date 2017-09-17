@@ -1,4 +1,4 @@
-package com.finance.pm.encog.application.training.factories.impl;
+package com.finance.pm.encog.application.nnetwork.propagation.impl;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -11,7 +11,7 @@ import org.encog.ml.train.MLTrain;
 import org.encog.ml.train.strategy.RequiredImprovementStrategy;
 import org.encog.neural.networks.training.propagation.manhattan.ManhattanPropagation;
 
-import com.finance.pm.encog.application.training.factories.PropagationFactory;
+import com.finance.pm.encog.application.nnetwork.propagation.PropagationFactory;
 
 /**
  * Generic propagation training method wrapper for Encog {@link MLTrainFactory}
@@ -21,8 +21,10 @@ public class GenericPropagationFactory implements PropagationFactory {
     @Override
     public MLTrain create(MLMethod network, MLDataSet dataSet, String propagationType, String... args) {
 
+        if (propagationType == null) throw new RuntimeException();
+
         MLTrainFactory trainFactory = new MLTrainFactory();
-        String argString = Arrays.stream(args).collect(Collectors.joining(","));
+        String argString = (args == null)?null:Arrays.stream(args).collect(Collectors.joining(","));
         MLTrain mlTrain = trainFactory.create(network, dataSet, propagationType, argString);
 
         if (network instanceof MLResettable && !(mlTrain instanceof ManhattanPropagation)) {

@@ -1,12 +1,12 @@
-package com.finance.pm.encog.application.nnetwork.factories.impl;
+package com.finance.pm.encog.application.nnetwork.topology.impl;
 
 import java.util.LinkedList;
 
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 
-import com.finance.pm.encog.application.nnetwork.factories.LayerDescription;
-import com.finance.pm.encog.application.nnetwork.factories.NnFactory;
+import com.finance.pm.encog.application.nnetwork.topology.LayerDescription;
+import com.finance.pm.encog.application.nnetwork.topology.NnFactory;
 
 /**
  * {@link BasicNetwork} creator
@@ -15,7 +15,7 @@ import com.finance.pm.encog.application.nnetwork.factories.NnFactory;
 public class BasicNetworkFactory implements NnFactory {
 
     @Override
-    public BasicNetwork create(LinkedList<LayerDescription> topology) throws Exception {
+    public BasicNetwork create(LinkedList<LayerDescription> topology) {
 
         BasicNetwork basicNetwork = new BasicNetwork();
 
@@ -25,11 +25,7 @@ public class BasicNetworkFactory implements NnFactory {
         LayerDescription outLayer = topology.removeLast();
 
         topology.forEach(layer -> {
-            try {
-                basicNetwork.addLayer(new BasicLayer(layer.getActivationFunction(), false, layer.getNeuronsCount()));
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
+            basicNetwork.addLayer(new BasicLayer(layer.getActivationFunction(), false, layer.getNeuronsCount()));
         });
 
         basicNetwork.addLayer(new BasicLayer(outLayer.getActivationFunction(), false, outLayer.getNeuronsCount()));

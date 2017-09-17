@@ -1,4 +1,4 @@
-package com.finance.pm.encog.application.training.factories;
+package com.finance.pm.encog.application.nnetwork.propagation;
 
 import org.encog.ml.MLMethod;
 import org.encog.ml.data.MLDataSet;

@@ -1,4 +1,4 @@
-package com.finance.pm.encog.application.training.factories.impl;
+package com.finance.pm.encog.application.nnetwork.propagation.impl;
 
 import org.encog.ml.MLMethod;
 import org.encog.ml.data.MLDataSet;
@@ -7,7 +7,7 @@ import org.encog.neural.networks.training.propagation.Propagation;
 import org.encog.neural.networks.training.propagation.resilient.RPROPType;
 import org.encog.neural.networks.training.propagation.resilient.ResilientPropagation;
 
-import com.finance.pm.encog.application.training.factories.PropagationFactory;
+import com.finance.pm.encog.application.nnetwork.propagation.PropagationFactory;
 
 /**
  * Resilient propagation training method.
