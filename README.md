@@ -1,4 +1,6 @@
 # encogforpm
 Premiummarkets proof of concept. Encog Integration excerpt.
-To run :
+
+To run it : 
+
 ./gradlew run
