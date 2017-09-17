@@ -15,7 +15,7 @@ import com.finance.pm.encog.application.training.factories.PropagationFactory;
 
 /**
  * Generic propagation training method wrapper for Encog {@link MLTrainFactory}
- * TODO To generalise outside ResilientPropagation and TemporalDataSet (cf. input size inconsistencies with BackPropagation training)
+ * TODO To generalise outside ResilientPropagation and TemporalDataSet
  */
 public class GenericPropagationFactory implements PropagationFactory {
 

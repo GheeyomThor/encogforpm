@@ -53,14 +53,14 @@ public class EncogService {
      * @return The predicted output
      * @throws Exception
      */
-    public LinkedHashMap<MLDataPair, double[]> oneFoldTrainAndCompute(
-            String architecture, int inputSize, int lagWindowSize) throws Exception {
-
-        LOGGER.info("Creating network");
-        MLMethod network = networkFactory.create(architecture, inputSize, 1);
+    public LinkedHashMap<MLDataPair, double[]> oneFoldTrainAndCompute(String architecture, int lagWindowSize)
+            throws Exception {
 
         LOGGER.info("Importing data");
         MLDataSet trainingSet = dataImporter.importData(lagWindowSize, 1);
+
+        LOGGER.info("Creating network");
+        MLMethod network = networkFactory.create(architecture, trainingSet.getInputSize(), trainingSet.getIdealSize());
 
         LOGGER.info("Training network");
         File trainedEg = trainer.train(network, trainingSet);

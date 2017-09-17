@@ -19,17 +19,16 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        // For this Proof of concept we use pre recorded training data from the
-        // file system
-        // The input size is 26 and ideal output size 1.
+        // For this Proof of concept we use pre recorded training data from the file system
+        // The input size is (26 * (lag window size)) and ideal output size 1.
         Injector injector = Guice.createInjector(new POCAdapterModule(), new EncogServiceModule());
         EncogService encogService = injector.getInstance(EncogService.class);
 
-        // compute
+        // Compute
         LinkedHashMap<MLDataPair, double[]> prediction = encogService
-                .oneFoldTrainAndCompute("?:B->SIGMOID->25:B->SIGMOID->?", 26, 12);
+                .oneFoldTrainAndCompute("?:B->SIGMOID->25:B->SIGMOID->?", 12);
 
-        // export prediction
+        // Export prediction
         CsvImportExport<MLDataPair> csvImportExport = injector
                 .getInstance(Key.get(new TypeLiteral<CsvImportExport<MLDataPair>>() {}));
         csvImportExport.exportData(
