@@ -8,18 +8,19 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.SortedMap;
+
+import javax.inject.Named;
 
 import org.encog.ml.data.MLDataSet;
+import org.encog.ml.data.versatile.columns.ColumnType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.finance.pm.encog.data.DataImporter;
+import com.finance.pm.encog.data.DataSetLoader;
 import com.finance.pm.encog.guice.EncogServiceModule;
 import com.finance.pm.encog.util.DataSourceAdapter;
 import com.finance.pm.encog.util.impl.MapCsvImportExport;
@@ -30,8 +31,8 @@ import com.google.inject.Injector;
 
 public class TemporalDataSetImporterTest {
 
-    @Inject
-    private DataImporter temporalDataSetImporter;
+    @Inject @Named("temporal")
+    private DataSetLoader temporalDataSetImporter;
     @Inject
     private MapCsvImportExport mapCsvImportExport;
 
@@ -59,19 +60,19 @@ public class TemporalDataSetImporterTest {
 
         // Given
         URL inputsFile = this.getClass().getResource("/idealOutputs.csv");
-        SortedMap<Date, double[]> inputsData = mapCsvImportExport.importData(new File(inputsFile.getPath()));
+        List<double[]> inputsData = new ArrayList<double[]>(mapCsvImportExport.importData(new File(inputsFile.getPath())).values());
 
         URL outputs = this.getClass().getResource("/trainingInputs.csv");
-        SortedMap<Date, double[]> outputsData = mapCsvImportExport.importData(new File(outputs.getPath()));
+        List<double[]> outputsData = new ArrayList<double[]>(mapCsvImportExport.importData(new File(outputs.getPath())).values());
 
         when(dataSourceMock.getInputEventsDescription()).thenReturn(Arrays.asList((new String[26])));
-        when(dataSourceMock.geTrainingInputs()).thenReturn(inputsData);
-        when(dataSourceMock.geTrainingOutputs()).thenReturn(outputsData);
+        when(dataSourceMock.getTrainingInputs()).thenReturn(inputsData);
+        when(dataSourceMock.getTrainingOutputs()).thenReturn(outputsData);
 
         // When
         int inputWindowSize = 12;
         int predictWindowSize = 1;
-        MLDataSet dataSet = temporalDataSetImporter.importData(inputWindowSize, predictWindowSize);
+        MLDataSet dataSet = temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, inputWindowSize, predictWindowSize);
 
         // Then
         assertEquals(inputsData.size() - inputWindowSize - predictWindowSize, dataSet.getRecordCount());
@@ -85,16 +86,16 @@ public class TemporalDataSetImporterTest {
 
         // Given
         URL inputsFile = this.getClass().getResource("/idealOutputs.csv");
-        SortedMap<Date, double[]> inputsData = mapCsvImportExport.importData(new File(inputsFile.getPath()));
-        Date randomKey = pickRandomKey(inputsData);
+        List<double[]> inputsData = new ArrayList<double[]>(mapCsvImportExport.importData(new File(inputsFile.getPath())).values());
+        int randomKey = pickRandomKey(inputsData);
         inputsData.remove(randomKey);
 
         URL outputs = this.getClass().getResource("/trainingInputs.csv");
-        SortedMap<Date, double[]> outputsData = mapCsvImportExport.importData(new File(outputs.getPath()));
+        List<double[]> outputsData = new ArrayList<double[]>(mapCsvImportExport.importData(new File(outputs.getPath())).values());
 
         when(dataSourceMock.getInputEventsDescription()).thenReturn(Arrays.asList((new String[26])));
-        when(dataSourceMock.geTrainingInputs()).thenReturn(inputsData);
-        when(dataSourceMock.geTrainingOutputs()).thenReturn(outputsData);
+        when(dataSourceMock.getTrainingInputs()).thenReturn(inputsData);
+        when(dataSourceMock.getTrainingOutputs()).thenReturn(outputsData);
 
         // Expect
         thrown.expect(RuntimeException.class);
@@ -102,15 +103,13 @@ public class TemporalDataSetImporterTest {
         // When
         int inputWindowSize = 12;
         int predictWindowSize = 1;
-        MLDataSet dataSet = temporalDataSetImporter.importData(inputWindowSize, predictWindowSize);
+        temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, inputWindowSize, predictWindowSize);
 
     }
 
-    private Date pickRandomKey(SortedMap<Date, double[]> inputsData) {
+    private int pickRandomKey(List<double[]> inputsData) {
         Random random = new Random();
-        List<Date> keys = new ArrayList<Date>(inputsData.keySet());
-        Date randomKey = keys.get(random.nextInt(keys.size()));
-        return randomKey;
+        return random.nextInt(inputsData.size());
     }
 
     @Test(expected = RuntimeException.class)
@@ -118,21 +117,21 @@ public class TemporalDataSetImporterTest {
 
         // Given
         URL inputsFile = this.getClass().getResource("/idealOutputs.csv");
-        SortedMap<Date, double[]> inputsData = mapCsvImportExport.importData(new File(inputsFile.getPath()));
-        Date randomKey = pickRandomKey(inputsData);
-        inputsData.put(randomKey, null);
+        List<double[]> inputsData = new ArrayList<double[]>(mapCsvImportExport.importData(new File(inputsFile.getPath())).values());
+        int randomKey = pickRandomKey(inputsData);
+        inputsData.set(randomKey, null);
 
         URL outputs = this.getClass().getResource("/trainingInputs.csv");
-        SortedMap<Date, double[]> outputsData = mapCsvImportExport.importData(new File(outputs.getPath()));
+        List<double[]> outputsData = new ArrayList<double[]>(mapCsvImportExport.importData(new File(outputs.getPath())).values());
 
         when(dataSourceMock.getInputEventsDescription()).thenReturn(Arrays.asList((new String[26])));
-        when(dataSourceMock.geTrainingInputs()).thenReturn(inputsData);
-        when(dataSourceMock.geTrainingOutputs()).thenReturn(outputsData);
+        when(dataSourceMock.getTrainingInputs()).thenReturn(inputsData);
+        when(dataSourceMock.getTrainingOutputs()).thenReturn(outputsData);
 
         // When
         int inputWindowSize = 12;
         int predictWindowSize = 1;
-        MLDataSet dataSet = temporalDataSetImporter.importData(inputWindowSize, predictWindowSize);
+        temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, inputWindowSize, predictWindowSize);
 
     }
 
@@ -141,21 +140,21 @@ public class TemporalDataSetImporterTest {
 
         // Given
         URL inputsFile = this.getClass().getResource("/idealOutputs.csv");
-        SortedMap<Date, double[]> inputsData = mapCsvImportExport.importData(new File(inputsFile.getPath()));
-        Date randomKey = pickRandomKey(inputsData);
-        inputsData.put(randomKey, new double[42]);
+        List<double[]> inputsData = new ArrayList<double[]>(mapCsvImportExport.importData(new File(inputsFile.getPath())).values());
+        int randomKey = pickRandomKey(inputsData);
+        inputsData.set(randomKey, new double[42]);
 
         URL outputs = this.getClass().getResource("/trainingInputs.csv");
-        SortedMap<Date, double[]> outputsData = mapCsvImportExport.importData(new File(outputs.getPath()));
+        List<double[]> outputsData = new ArrayList<double[]>(mapCsvImportExport.importData(new File(outputs.getPath())).values());
 
         when(dataSourceMock.getInputEventsDescription()).thenReturn(Arrays.asList((new String[26])));
-        when(dataSourceMock.geTrainingInputs()).thenReturn(inputsData);
-        when(dataSourceMock.geTrainingOutputs()).thenReturn(outputsData);
+        when(dataSourceMock.getTrainingInputs()).thenReturn(inputsData);
+        when(dataSourceMock.getTrainingOutputs()).thenReturn(outputsData);
 
         // When
         int inputWindowSize = 12;
         int predictWindowSize = 1;
-        MLDataSet dataSet = temporalDataSetImporter.importData(inputWindowSize, predictWindowSize);
+        temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, inputWindowSize, predictWindowSize);
 
     }
 
@@ -164,22 +163,22 @@ public class TemporalDataSetImporterTest {
 
         // Given
         URL inputsFile = this.getClass().getResource("/idealOutputs.csv");
-        SortedMap<Date, double[]> inputsData = mapCsvImportExport.importData(new File(inputsFile.getPath()));
+        List<double[]> inputsData = new ArrayList<double[]>(mapCsvImportExport.importData(new File(inputsFile.getPath())).values());
 
         URL outputs = this.getClass().getResource("/trainingInputs.csv");
-        SortedMap<Date, double[]> outputsData = mapCsvImportExport.importData(new File(outputs.getPath()));
+        List<double[]> outputsData = new ArrayList<double[]>(mapCsvImportExport.importData(new File(outputs.getPath())).values());
 
         List<String> inputEventsDescription = dataSourceMock.getInputEventsDescription();
         inputEventsDescription.remove(new Random().nextInt(inputEventsDescription.size()));
 
         when(inputEventsDescription).thenReturn(Arrays.asList((new String[26])));
-        when(dataSourceMock.geTrainingInputs()).thenReturn(inputsData);
-        when(dataSourceMock.geTrainingOutputs()).thenReturn(outputsData);
+        when(dataSourceMock.getTrainingInputs()).thenReturn(inputsData);
+        when(dataSourceMock.getTrainingOutputs()).thenReturn(outputsData);
 
         // When
         int inputWindowSize = 12;
         int predictWindowSize = 1;
-        MLDataSet dataSet = temporalDataSetImporter.importData(inputWindowSize, predictWindowSize);
+        temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, inputWindowSize, predictWindowSize);
 
     }
 

@@ -1,14 +1,13 @@
 package com.finance.pm.encog.data.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.temporal.TemporalDataDescription;
 import org.encog.ml.data.temporal.TemporalMLDataSet;
 import org.encog.ml.data.temporal.TemporalPoint;
+import org.encog.ml.data.versatile.columns.ColumnType;
 
-import com.finance.pm.encog.data.DataImporter;
+import com.finance.pm.encog.data.DataSetLoader;
 import com.finance.pm.encog.util.DataSourceAdapter;
 import com.google.inject.Inject;
 
@@ -19,26 +18,29 @@ import com.google.inject.Inject;
  * {@link org.encog.mathutil.Equilateral} normalisation for the input instead of
  * an adhoc normalisation.
  */
-public class TemporalDataSetImporter implements DataImporter {
+public class TemporalDataSetLoader implements DataSetLoader {
 
     @Inject
     DataSourceAdapter pmDataAdapter;
 
-    public TemporalDataSetImporter() {
+    public TemporalDataSetLoader() {
         super();
     }
 
     @Override
-    public MLDataSet importData(int inputWindowSize, int predictWindowSize) {
+    public TemporalMLDataSet loadData(
+            ColumnType inputColumnType, ColumnType outputColumnType, 
+            int lagWindowSize, int predictWindowSize,
+            String typeFeedforward, String modelArchitecture) {
 
-        List<double[]> trainingInputValues = new ArrayList<double[]>(pmDataAdapter.geTrainingInputs().values());
-        List<double[]> trainingIdealValues = new ArrayList<double[]>(pmDataAdapter.geTrainingOutputs().values());
+        List<double[]> trainingInputValues = pmDataAdapter.getTrainingInputs();
+        List<double[]> trainingIdealValues = pmDataAdapter.getTrainingOutputs();
 
         if (trainingInputValues.size() != trainingIdealValues.size()) {
             throw new RuntimeException("Inputs and outputs must comply with each other. Size differ.");
         }
 
-        TemporalMLDataSet temporalMLDataSet = new TemporalMLDataSet(inputWindowSize, predictWindowSize);
+        TemporalMLDataSet temporalMLDataSet = new TemporalMLDataSet(lagWindowSize, predictWindowSize);
 
         // We add one input description for each event
         pmDataAdapter.getInputEventsDescription().stream().forEach(event -> {

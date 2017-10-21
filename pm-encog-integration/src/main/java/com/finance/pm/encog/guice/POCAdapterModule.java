@@ -12,7 +12,21 @@ public class POCAdapterModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(DataSourceAdapter.class).to(POCDataSourceAdapter.class);
+        install(new VersatileDataLoaderModule(Training.class) {
+            
+            @Override
+            public void bindDataAdapter() {
+                bind(DataSourceAdapter.class).to(POCDataSourceAdapter.class);
+            }
+        });
+        install(new VersatileDataLoaderModule(Validation.class) {
+            
+            @Override
+            public void bindDataAdapter() {
+                bind(DataSourceAdapter.class).to(POCDataSourceAdapter.class);
+            }
+        });
+
     }
 
 }

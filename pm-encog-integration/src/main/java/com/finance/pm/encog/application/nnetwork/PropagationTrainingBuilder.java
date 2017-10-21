@@ -8,12 +8,12 @@ import org.encog.ml.factory.MLTrainFactory;
 import org.encog.ml.train.MLTrain;
 import org.encog.neural.networks.training.propagation.Propagation;
 
+import com.finance.pm.encog.application.nnetwork.method.LayerDescription;
+import com.finance.pm.encog.application.nnetwork.method.NnFactory;
 import com.finance.pm.encog.application.nnetwork.propagation.PropagationFactory;
 import com.finance.pm.encog.application.nnetwork.propagation.impl.GenericPropagationFactory;
-import com.finance.pm.encog.application.nnetwork.topology.LayerDescription;
-import com.finance.pm.encog.application.nnetwork.topology.NnFactory;
 
-public class PropagationTrainingMethodBuilder {
+public class PropagationTrainingBuilder {
 
     private NnFactory nnFactory;
     private MLDataSet dataSet;
@@ -23,32 +23,32 @@ public class PropagationTrainingMethodBuilder {
     private String propagationType;
     private String[] propagationArgs;
 
-    public PropagationTrainingMethodBuilder withMethodFactory(NnFactory nnFactory) {
+    public PropagationTrainingBuilder withMethodFactory(NnFactory nnFactory) {
         this.nnFactory = nnFactory;
         return this;
     }
 
-    public PropagationTrainingMethodBuilder withDataSet(MLDataSet dataSet) {
+    public PropagationTrainingBuilder withDataSet(MLDataSet dataSet) {
         this.dataSet = dataSet;
         return this;
     }
 
     //TODO mapping architecture list object <-> architecture string
-    public PropagationTrainingMethodBuilder withArchitecture(LinkedList<LayerDescription> architecture) {
+    public PropagationTrainingBuilder withArchitecture(LinkedList<LayerDescription> architecture) {
         if (architectureString != null) throw new RuntimeException("Architecture already defined");
         this.architecture = architecture;
         return this;
     }
 
 
-    public PropagationTrainingMethodBuilder withArchitecture(String achitectureString) {
+    public PropagationTrainingBuilder withArchitecture(String achitectureString) {
         if (architecture != null) throw new RuntimeException("Architecture already defined");
         this.architectureString = achitectureString;
         return this;
     }
 
 
-    public PropagationTrainingMethodBuilder withPropagationFactory(PropagationFactory propagationFactory) {
+    public PropagationTrainingBuilder withPropagationFactory(PropagationFactory propagationFactory) {
         this.propagationFactory = propagationFactory;
         return this;
     }
@@ -57,7 +57,7 @@ public class PropagationTrainingMethodBuilder {
      * @param propagationType will be propagation type as in {@link Propagation} and {@link MLTrainFactory} </br>
      * Propagation type can be optional when inferred by injection of the propagation implementation
      */
-    public PropagationTrainingMethodBuilder withPropagationType(String propagationType) {
+    public PropagationTrainingBuilder withPropagationType(String propagationType) {
         this.propagationType = propagationType;
         return null;
     }
@@ -66,7 +66,7 @@ public class PropagationTrainingMethodBuilder {
      * 
      * @param args additional arguments related to the specific propagation each in the form : "name=value"
      */
-    public PropagationTrainingMethodBuilder withPropagationParameters(String... args) {
+    public PropagationTrainingBuilder withPropagationParameters(String... args) {
         this.propagationArgs = args;
         return null;
     }
@@ -82,13 +82,13 @@ public class PropagationTrainingMethodBuilder {
             throw new RuntimeException("Unspecified propagation type for "+GenericPropagationFactory.class);
         }
 
-        MLMethod network;
+        MLMethod mlMethod;
         if (architectureString != null) {
-            network= nnFactory.create(architectureString, dataSet.getInputSize(), dataSet.getIdealSize());
+            mlMethod= nnFactory.create(architectureString, dataSet.getInputSize(), dataSet.getIdealSize());
         } else {
-            network = nnFactory.create(architecture);
+            mlMethod = nnFactory.create(architecture);
         }
-        MLTrain mlTrain = propagationFactory.create(network, dataSet, propagationType, propagationArgs);
+        MLTrain mlTrain = propagationFactory.create(mlMethod, dataSet, propagationType, propagationArgs);
 
         return mlTrain;
     }

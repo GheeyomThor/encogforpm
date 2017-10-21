@@ -2,9 +2,13 @@ package com.finance.pm.encog.application.prediction;
 
 import java.io.File;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
+import org.encog.ml.data.versatile.NormalizationHelper;
+
+import com.finance.pm.encog.util.DataSourceAdapter;
 
 /**
  * To run prediction on a existing trained network. Output can be either for
@@ -23,6 +27,8 @@ public interface NnPredictor {
      * @return predicted output data
      */
     LinkedHashMap<MLDataPair, double[]> compute(File trainedEg, MLDataSet trainingSet);
+    
+    List<double[]> versatileDataSetCompute(File trainedEg, NormalizationHelper normHelper, int lagWindowSize);
 
     /**
      * Classification prediction
@@ -34,5 +40,9 @@ public interface NnPredictor {
      * @return predicted output data
      */
     LinkedHashMap<MLDataPair, double[]> classifiy(File trainedEg, MLDataSet trainingSet);
+
+    DataSourceAdapter getDataSourceAdapter();
+
+
 
 }

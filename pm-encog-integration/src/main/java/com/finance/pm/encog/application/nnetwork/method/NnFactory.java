@@ -1,11 +1,11 @@
-package com.finance.pm.encog.application.nnetwork.topology;
+package com.finance.pm.encog.application.nnetwork.method;
 
 import java.util.LinkedList;
 
 import org.encog.ml.MLMethod;
 import org.encog.neural.networks.BasicNetwork;
 
-import com.finance.pm.encog.application.nnetwork.topology.impl.GenericFeedForwardNetworkFactory;
+import com.finance.pm.encog.application.nnetwork.method.impl.GenericFeedForwardNetworkFactory;
 
 /**
  * 

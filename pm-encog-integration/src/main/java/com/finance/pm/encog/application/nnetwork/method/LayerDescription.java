@@ -1,4 +1,4 @@
-package com.finance.pm.encog.application.nnetwork.topology;
+package com.finance.pm.encog.application.nnetwork.method;
 
 import org.encog.engine.network.activation.ActivationFunction;
 
@@ -28,7 +28,7 @@ public class LayerDescription {
             newInstance = activationFunction.newInstance();
             return newInstance;
         } catch (InstantiationException | IllegalAccessException e) {
-           throw new RuntimeException(e);
+           throw new RuntimeException("Construction failed for "+activationFunction.getName(), e);
         }
     }
 

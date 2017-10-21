@@ -1,14 +1,14 @@
 package com.finance.pm.encog;
 
-import java.io.File;
 import java.util.LinkedHashMap;
-import java.util.UUID;
+import java.util.Optional;
 
 import org.encog.ml.data.MLDataPair;
 
 import com.finance.pm.encog.application.EncogService;
 import com.finance.pm.encog.guice.EncogServiceModule;
 import com.finance.pm.encog.guice.POCAdapterModule;
+import com.finance.pm.encog.guice.TemporalDataLoaderModule;
 import com.finance.pm.encog.util.CsvImportExport;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -21,7 +21,7 @@ public class Main {
 
         // For this Proof of concept we use pre recorded training data from the file system
         // The input size is (26 * (lag window size)) and ideal output size 1.
-        Injector injector = Guice.createInjector(new POCAdapterModule(), new EncogServiceModule());
+        Injector injector = Guice.createInjector(new POCAdapterModule(), new TemporalDataLoaderModule(), new EncogServiceModule());
         EncogService encogService = injector.getInstance(EncogService.class);
 
         // Compute
@@ -31,8 +31,7 @@ public class Main {
         // Export prediction
         CsvImportExport<MLDataPair> csvImportExport = injector
                 .getInstance(Key.get(new TypeLiteral<CsvImportExport<MLDataPair>>() {}));
-        csvImportExport.exportData(
-                new File(System.getProperty("user.dir") + File.separator + UUID.randomUUID() + ".csv"), prediction);
+        csvImportExport.exportData(Optional.empty(), Optional.empty(), "prediction", prediction);
 
     }
 

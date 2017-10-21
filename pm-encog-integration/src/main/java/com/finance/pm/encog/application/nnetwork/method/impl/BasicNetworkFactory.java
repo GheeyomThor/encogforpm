@@ -1,12 +1,12 @@
-package com.finance.pm.encog.application.nnetwork.topology.impl;
+package com.finance.pm.encog.application.nnetwork.method.impl;
 
 import java.util.LinkedList;
 
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
 
-import com.finance.pm.encog.application.nnetwork.topology.LayerDescription;
-import com.finance.pm.encog.application.nnetwork.topology.NnFactory;
+import com.finance.pm.encog.application.nnetwork.method.LayerDescription;
+import com.finance.pm.encog.application.nnetwork.method.NnFactory;
 
 /**
  * {@link BasicNetwork} creator

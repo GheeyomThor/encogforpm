@@ -1,9 +1,9 @@
-package com.finance.pm.encog.application.nnetwork.topology.impl;
+package com.finance.pm.encog.application.nnetwork.method.impl;
 
 import org.encog.ml.MLMethod;
 import org.encog.ml.factory.MLMethodFactory;
 
-import com.finance.pm.encog.application.nnetwork.topology.NnFactory;
+import com.finance.pm.encog.application.nnetwork.method.NnFactory;
 
 /**
  * Generic wrapper around {@link MLMethodFactory} </br>

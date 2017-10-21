@@ -2,10 +2,10 @@ package com.finance.pm.encog.util.impl;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.SortedMap;
 
 import javax.inject.Inject;
 
@@ -27,20 +27,26 @@ public class POCDataSourceAdapter implements DataSourceAdapter {
     }
 
     @Override
-    public SortedMap<Date, double[]> geTrainingOutputs() {
-        URL inputs = this.getClass().getResource("/idealOutputs.csv");
-        return mapCsvImportExport.importData(new File(inputs.getPath()));
+    public List<double[]> getTrainingOutputs() {
+        URL outputs = this.getClass().getResource("/idealOutputs.csv");
+        return new ArrayList<>(mapCsvImportExport.importData(new File(outputs.getPath())).values());
     }
 
     @Override
-    public SortedMap<Date, double[]> geTrainingInputs() {
-        URL outputs = this.getClass().getResource("/trainingInputs.csv");
-        return mapCsvImportExport.importData(new File(outputs.getPath()));
+    public List<double[]> getTrainingInputs() {
+        URL inputs = this.getClass().getResource("/trainingInputs.csv");
+        return new ArrayList<>(mapCsvImportExport.importData(new File(inputs.getPath())).values());
     }
 
     @Override
     public List<String> getInputEventsDescription() {
         return Arrays.asList((new String[26]));
+    }
+
+    @Override
+    public List<Date> getTrainingInputsDatesList() {
+        URL inputs = this.getClass().getResource("/trainingInputs.csv");
+        return new ArrayList<>(mapCsvImportExport.importData(new File(inputs.getPath())).keySet());
     }
 
 }

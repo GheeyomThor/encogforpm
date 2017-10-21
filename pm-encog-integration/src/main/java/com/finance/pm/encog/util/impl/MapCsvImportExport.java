@@ -10,15 +10,28 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.inject.Inject;
+
+import com.finance.pm.encog.application.InputOutputDescription;
+import com.finance.pm.encog.application.NetworkDescription;
 import com.finance.pm.encog.util.CsvImportExport;
+import com.finance.pm.encog.util.EGFileReferenceManager;
 
 public class MapCsvImportExport implements CsvImportExport<Date> {
+    
+    @Inject
+    EGFileReferenceManager egFileReferenceManager;
 
     @Override
-    public void exportData(File exportFile, Map<Date, double[]> map) {
+    public void exportData(Optional<InputOutputDescription> iODescr, Optional<NetworkDescription> netDescr, String exportFileNameExt, Map<Date, double[]> map) {
+        
+        //runStamp+"_"+exportFileNameExt
+        String pathname = egFileReferenceManager.encogFileNameGenerator(iODescr, netDescr)[0]+"_"+exportFileNameExt;
+        File exportFile = new File(System.getProperty("installdir")+File.separator+pathname+".csv");
 
         try (FileWriter fileWriter = new FileWriter(exportFile);
                 BufferedWriter bufferWriter = new BufferedWriter(fileWriter)) {

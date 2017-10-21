@@ -8,37 +8,40 @@ import javax.inject.Inject;
 
 import org.encog.engine.network.activation.ActivationSigmoid;
 import org.encog.ml.data.MLDataSet;
+import org.encog.ml.data.versatile.columns.ColumnType;
 import org.encog.ml.factory.MLTrainFactory;
 import org.encog.ml.train.MLTrain;
 import org.encog.neural.networks.BasicNetwork;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.finance.pm.encog.application.nnetwork.method.LayerDescription;
+import com.finance.pm.encog.application.nnetwork.method.NnFactory;
+import com.finance.pm.encog.application.nnetwork.method.impl.BasicNetworkFactory;
+import com.finance.pm.encog.application.nnetwork.method.impl.GenericFeedForwardNetworkFactory;
 import com.finance.pm.encog.application.nnetwork.propagation.impl.GenericPropagationFactory;
 import com.finance.pm.encog.application.nnetwork.propagation.impl.ResilientPropagationFactory;
-import com.finance.pm.encog.application.nnetwork.topology.LayerDescription;
-import com.finance.pm.encog.application.nnetwork.topology.NnFactory;
-import com.finance.pm.encog.application.nnetwork.topology.impl.BasicNetworkFactory;
-import com.finance.pm.encog.application.nnetwork.topology.impl.GenericFeedForwardNetworkFactory;
-import com.finance.pm.encog.data.impl.TemporalDataSetImporter;
+import com.finance.pm.encog.data.impl.TemporalDataSetLoader;
 import com.finance.pm.encog.guice.EncogServiceModule;
 import com.finance.pm.encog.guice.POCAdapterModule;
+import com.finance.pm.encog.guice.Training;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 public class PropagationTrainingMethodBuilderTest {
 
-    private PropagationTrainingMethodBuilder propMLBuilder;
+    private PropagationTrainingBuilder propMLBuilder;
     
     @Inject
-    private TemporalDataSetImporter temporalDataSetImporter;
+    @Training
+    private TemporalDataSetLoader temporalDataSetImporter;
 
     
     @Before
     public void setUp() throws Exception {
         Injector injector = Guice.createInjector(new POCAdapterModule(), new EncogServiceModule());
         injector.injectMembers(this);
-        propMLBuilder = new PropagationTrainingMethodBuilder();
+        propMLBuilder = new PropagationTrainingBuilder();
     }
     
     
@@ -47,7 +50,7 @@ public class PropagationTrainingMethodBuilderTest {
         
         //Given
         propMLBuilder.withArchitecture("?:B->SIGMOID->25:B->SIGMOID->?");
-        MLDataSet mlDataSet = temporalDataSetImporter.importData(12, 1);
+        MLDataSet mlDataSet = temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, 12, 1);
         propMLBuilder.withDataSet(mlDataSet);
         propMLBuilder.withPropagationFactory(new GenericPropagationFactory());
         propMLBuilder.withPropagationType(MLTrainFactory.TYPE_BACKPROP);
@@ -61,7 +64,7 @@ public class PropagationTrainingMethodBuilderTest {
     public void testGenericBasicNetworkFactory() {
         
         //Given
-        MLDataSet mlDataSet = temporalDataSetImporter.importData(12, 1);
+        MLDataSet mlDataSet = temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, 12, 1);
         propMLBuilder.withDataSet(mlDataSet);
         
         LinkedList<LayerDescription> topology = new LinkedList<>();
@@ -85,7 +88,7 @@ public class PropagationTrainingMethodBuilderTest {
         
         //Given
         propMLBuilder.withArchitecture("?:B->SIGMOID->25:B->SIGMOID->?");
-        MLDataSet mlDataSet = temporalDataSetImporter.importData(12, 1);
+        MLDataSet mlDataSet = temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous,12, 1);
         propMLBuilder.withDataSet(mlDataSet);
         NnFactory mlMethod = new BasicNetworkFactory();
         propMLBuilder.withMethodFactory(mlMethod);
@@ -102,7 +105,7 @@ public class PropagationTrainingMethodBuilderTest {
         
         //Given
         propMLBuilder.withArchitecture("?:B->SIGMOID->25:B->SIGMOID->?");
-        MLDataSet mlDataSet = temporalDataSetImporter.importData(12, 1);
+        MLDataSet mlDataSet = temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, 12, 1);
         propMLBuilder.withDataSet(mlDataSet);
         NnFactory mlMethod = new GenericFeedForwardNetworkFactory();
         propMLBuilder.withMethodFactory(mlMethod);
@@ -123,7 +126,7 @@ public class PropagationTrainingMethodBuilderTest {
         
         //Given
         propMLBuilder.withArchitecture("");
-        MLDataSet mlDataSet = temporalDataSetImporter.importData(12, 1);
+        MLDataSet mlDataSet = temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, 12, 1);
         propMLBuilder.withDataSet(mlDataSet);
         NnFactory mlMethod = new GenericFeedForwardNetworkFactory();
         propMLBuilder.withMethodFactory(mlMethod);
@@ -139,7 +142,7 @@ public class PropagationTrainingMethodBuilderTest {
         
         //Given
         propMLBuilder.withArchitecture("?:B->SIGMOID->25:B->SIGMOID->?");
-        MLDataSet mlDataSet = temporalDataSetImporter.importData(12, 1);
+        MLDataSet mlDataSet = temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, 12, 1);
         propMLBuilder.withDataSet(mlDataSet);
         NnFactory mlMethod = new GenericFeedForwardNetworkFactory();
         propMLBuilder.withMethodFactory(mlMethod);

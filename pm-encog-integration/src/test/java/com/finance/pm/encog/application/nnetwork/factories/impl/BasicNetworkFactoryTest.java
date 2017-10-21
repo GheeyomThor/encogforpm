@@ -10,8 +10,8 @@ import org.encog.neural.networks.BasicNetwork;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.finance.pm.encog.application.nnetwork.topology.LayerDescription;
-import com.finance.pm.encog.application.nnetwork.topology.impl.BasicNetworkFactory;
+import com.finance.pm.encog.application.nnetwork.method.LayerDescription;
+import com.finance.pm.encog.application.nnetwork.method.impl.BasicNetworkFactory;
 import com.finance.pm.encog.guice.EncogServiceModule;
 import com.finance.pm.encog.guice.POCAdapterModule;
 import com.google.inject.Guice;

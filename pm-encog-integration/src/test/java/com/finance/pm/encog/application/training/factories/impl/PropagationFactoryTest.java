@@ -8,17 +8,19 @@ import javax.inject.Inject;
 import org.encog.ml.MLMethod;
 import org.encog.ml.TrainingImplementationType;
 import org.encog.ml.data.MLDataSet;
+import org.encog.ml.data.versatile.columns.ColumnType;
 import org.encog.ml.factory.MLTrainFactory;
 import org.encog.ml.train.MLTrain;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.finance.pm.encog.application.nnetwork.method.NnFactory;
 import com.finance.pm.encog.application.nnetwork.propagation.PropagationFactory;
 import com.finance.pm.encog.application.nnetwork.propagation.impl.GenericPropagationFactory;
-import com.finance.pm.encog.application.nnetwork.topology.NnFactory;
-import com.finance.pm.encog.data.impl.TemporalDataSetImporter;
+import com.finance.pm.encog.data.impl.TemporalDataSetLoader;
 import com.finance.pm.encog.guice.EncogServiceModule;
 import com.finance.pm.encog.guice.POCAdapterModule;
+import com.finance.pm.encog.guice.Training;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -31,7 +33,8 @@ public class PropagationFactoryTest {
     @Inject
     private NnFactory nnFactory;
     @Inject
-    private TemporalDataSetImporter temporalDataSetImporter;
+    @Training
+    private TemporalDataSetLoader temporalDataSetImporter;
 
     @Before
     public void setUp() throws Exception {
@@ -44,7 +47,7 @@ public class PropagationFactoryTest {
             Injector injector = Guice.createInjector(new POCAdapterModule(), new EncogServiceModule());
             injector.injectMembers(this);
 
-            MLDataSet dataSet = temporalDataSetImporter.importData(12, 1);
+            MLDataSet dataSet = temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, 12, 1);
             MLMethod networkMethod = nnFactory.create("?:B->SIGMOID->25:B->SIGMOID->?", dataSet.getInputSize(),
                     dataSet.getIdealSize());
 
@@ -75,7 +78,7 @@ public class PropagationFactoryTest {
                     }));
             injector.injectMembers(this);
 
-            MLDataSet dataSet = temporalDataSetImporter.importData(12, 1);
+            MLDataSet dataSet = temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, 12, 1);
             MLMethod networkMethod = nnFactory.create("?:B->SIGMOID->25:B->SIGMOID->?", dataSet.getInputSize(),
                     dataSet.getIdealSize());
 
@@ -107,7 +110,7 @@ public class PropagationFactoryTest {
                 }));
         injector.injectMembers(this);
 
-        MLDataSet dataSet = temporalDataSetImporter.importData(12, 1);
+        MLDataSet dataSet = temporalDataSetImporter.loadData(ColumnType.continuous, ColumnType.continuous, 12, 1);
         MLMethod networkMethod = nnFactory.create("?:B->SIGMOID->25:B->SIGMOID->?", dataSet.getInputSize(),
                 dataSet.getIdealSize());
 
