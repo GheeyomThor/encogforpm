@@ -39,7 +39,7 @@ public interface NnPredictor {
      *            Input data
      * @return predicted output data
      */
-    LinkedHashMap<MLDataPair, double[]> classifiy(File trainedEg, MLDataSet trainingSet);
+    LinkedHashMap<MLDataPair, double[]> classify(File trainedEg, MLDataSet trainingSet);
 
     DataSourceAdapter getDataSourceAdapter();
 

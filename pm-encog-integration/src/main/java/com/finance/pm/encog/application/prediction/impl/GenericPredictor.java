@@ -40,7 +40,7 @@ public class GenericPredictor implements NnPredictor {
     }
 
     @Override
-    public LinkedHashMap<MLDataPair, double[]> classifiy(File networkFile, MLDataSet trainingSet) {
+    public LinkedHashMap<MLDataPair, double[]> classify(File networkFile, MLDataSet trainingSet) {
 
         MLClassification network = (MLClassification) EncogDirectoryPersistence.loadObject(networkFile);
         LinkedHashMap<MLDataPair, double[]> outputs = new LinkedHashMap<>();

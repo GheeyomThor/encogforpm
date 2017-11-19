@@ -54,6 +54,7 @@ public class CrossValidationPredictor implements NnPredictor {
                 MLData output = network.compute(input);
 
                 String[] predictedStr = normHelper.denormalizeOutputVectorToString(output);
+                //System.out.println(output);
                 double[] predicted =  Arrays.stream(predictedStr).mapToDouble(Double::parseDouble).toArray();
                 result.add(predicted);
             }
@@ -69,7 +70,7 @@ public class CrossValidationPredictor implements NnPredictor {
     }
 
     @Override
-    public LinkedHashMap<MLDataPair, double[]> classifiy(File trainedEg, MLDataSet trainingSet) {
+    public LinkedHashMap<MLDataPair, double[]> classify(File trainedEg, MLDataSet trainingSet) {
         throw new UnsupportedOperationException();
     }
 

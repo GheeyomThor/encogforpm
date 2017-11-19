@@ -17,9 +17,9 @@ public interface DataSetLoader {
 
     default MLDataSet loadData(
             ColumnType inputColumnType, ColumnType outputColumnType, 
-            int lagWindowSize, int predictWindowSize) {
+            int lagWindowSize, int leadWindowSize) {
 
-        return this.loadData(inputColumnType, outputColumnType, lagWindowSize, predictWindowSize, MLMethodFactory.TYPE_FEEDFORWARD, null);
+        return this.loadData(inputColumnType, outputColumnType, lagWindowSize, leadWindowSize, MLMethodFactory.TYPE_FEEDFORWARD, null);
 
     }
 

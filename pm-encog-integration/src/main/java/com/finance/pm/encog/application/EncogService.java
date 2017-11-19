@@ -188,12 +188,15 @@ public class EncogService {
 
             LOGGER.info("File "+trainedEg.getAbsolutePath()+" was NOT found on the file system : retraining");
             prediction = crossValidationAndCompute(iODescription, networkDescription, egFileDescr[0]);
-            //egFileReferenceManager.updateEncogFileNameDescriptions(egFileDescr);
 
         }
 
         LOGGER.info("All done.");
-        Encog.getInstance().shutdown();
+        try {
+            Encog.getInstance().shutdown();
+        } catch (Exception e) {
+            LOGGER.warn("Encog service did an improper shutdown", e);
+        }
 
         return prediction;
 

@@ -30,7 +30,7 @@ public class TemporalDataSetLoader implements DataSetLoader {
     @Override
     public TemporalMLDataSet loadData(
             ColumnType inputColumnType, ColumnType outputColumnType, 
-            int lagWindowSize, int predictWindowSize,
+            int lagWindowSize, int leadWindowSize,
             String typeFeedforward, String modelArchitecture) {
 
         List<double[]> trainingInputValues = pmDataAdapter.getTrainingInputs();
@@ -40,7 +40,7 @@ public class TemporalDataSetLoader implements DataSetLoader {
             throw new RuntimeException("Inputs and outputs must comply with each other. Size differ.");
         }
 
-        TemporalMLDataSet temporalMLDataSet = new TemporalMLDataSet(lagWindowSize, predictWindowSize);
+        TemporalMLDataSet temporalMLDataSet = new TemporalMLDataSet(lagWindowSize, leadWindowSize);
 
         // We add one input description for each event
         pmDataAdapter.getInputEventsDescription().stream().forEach(event -> {

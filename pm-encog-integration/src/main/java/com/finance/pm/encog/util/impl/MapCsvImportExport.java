@@ -7,8 +7,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
@@ -16,12 +18,17 @@ import java.util.TreeMap;
 
 import javax.inject.Inject;
 
+import org.apache.log4j.Logger;
+
 import com.finance.pm.encog.application.InputOutputDescription;
 import com.finance.pm.encog.application.NetworkDescription;
 import com.finance.pm.encog.util.CsvImportExport;
 import com.finance.pm.encog.util.EGFileReferenceManager;
+import com.google.common.primitives.Doubles;
 
 public class MapCsvImportExport implements CsvImportExport<Date> {
+    
+    private static Logger LOGGER = Logger.getLogger(MapCsvImportExport.class.getName());
     
     @Inject
     EGFileReferenceManager egFileReferenceManager;
@@ -35,15 +42,18 @@ public class MapCsvImportExport implements CsvImportExport<Date> {
 
         try (FileWriter fileWriter = new FileWriter(exportFile);
                 BufferedWriter bufferWriter = new BufferedWriter(fileWriter)) {
+            
+            int maxLength = map.values().stream().max( (x,y) -> x.length - y.length ).orElse(new double[1]).length;
 
             SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
             map.entrySet().stream().forEach(entry -> {
 
                 try {
                     bufferWriter.write(String.format("%s, ", dateFormatter.format(entry.getKey())));
-                    double[] value = entry.getValue();
-                    String valueString = Arrays.toString(value);
-                    bufferWriter.write(valueString.substring(1, valueString.length() - 1));
+                    List<Double> value = new ArrayList<>(Doubles.asList(entry.getValue()));
+                    for(int i = value.size(); i < maxLength; i++) value.add(Double.NaN);
+                    String valueString = value.stream().map(e -> e.toString()).reduce((a,s) -> a + ", "+ s).get();
+                    bufferWriter.write(valueString);
                     bufferWriter.newLine();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -67,11 +77,21 @@ public class MapCsvImportExport implements CsvImportExport<Date> {
             SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
 
             String line;
+            int prevLength = 0;
             while ((line = bufferedReader.readLine()) != null) {
                 String[] rowSplit = line.split(",");
-                double[] array = Arrays.asList(rowSplit).subList(1, rowSplit.length).stream()
-                        .mapToDouble(x -> Double.valueOf(x)).toArray();
-                map.put(dateFormatter.parse(rowSplit[0]), array);
+                try {
+                    //file check
+                    if (prevLength > 0 && prevLength != rowSplit.length) throw new RuntimeException("Invalid file");
+                    prevLength = rowSplit.length;
+                    
+                    //entry creation
+                    double[] array = Arrays.asList(rowSplit).subList(1, rowSplit.length)
+                                            .stream().mapToDouble(x -> Double.valueOf(x)).toArray();
+                    map.put(dateFormatter.parse(rowSplit[0]), array);
+                } catch (Exception e) {
+                    LOGGER.warn("Unreadable line in "+exportFile.getAbsolutePath()+" : "+line);
+                }
             }
 
         } catch (Exception e) {

@@ -39,9 +39,9 @@ public class MLDataPairCsvImportExport implements CsvImportExport<MLDataPair> {
 
                 try {
                     //bufferWriter.write(String.format("%f, ", entry.getKey().getIdealArray()[0]));
-                    double[] key = entry.getKey().getIdealArray();
-                    String keyString = Arrays.toString(key);
-                    bufferWriter.write(keyString.substring(1, keyString.length() - 1));
+                    double[] ideals = entry.getKey().getIdealArray();
+                    String idealsString = Arrays.toString(ideals);
+                    bufferWriter.write(idealsString.substring(1, idealsString.length() - 1));
 
                     bufferWriter.write(", ");
 
@@ -52,6 +52,7 @@ public class MLDataPairCsvImportExport implements CsvImportExport<MLDataPair> {
                     bufferWriter.newLine();
 
                 } catch (IOException e) {
+                    LOGGER.error("Could export training ios ", e);
                     throw new RuntimeException(e);
                 }
 
