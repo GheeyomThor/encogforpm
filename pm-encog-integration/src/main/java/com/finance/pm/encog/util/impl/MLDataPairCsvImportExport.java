@@ -11,14 +11,13 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
-import org.encog.ml.data.MLDataPair;
 
 import com.finance.pm.encog.application.InputOutputDescription;
 import com.finance.pm.encog.application.NetworkDescription;
 import com.finance.pm.encog.util.CsvImportExport;
 import com.finance.pm.encog.util.EGFileReferenceManager;
 
-public class MLDataPairCsvImportExport implements CsvImportExport<MLDataPair> {
+public class MLDataPairCsvImportExport implements CsvImportExport<Integer> {
 
     private static Logger LOGGER = Logger.getLogger(MLDataPairCsvImportExport.class);
 
@@ -26,7 +25,7 @@ public class MLDataPairCsvImportExport implements CsvImportExport<MLDataPair> {
     EGFileReferenceManager egFileReferenceManager;
 
     @Override
-    public void exportData(Optional<InputOutputDescription> iODescr, Optional<NetworkDescription> netDescr, String exportFileNameExt, Map<MLDataPair, double[]> map) {
+    public void exportData(Optional<InputOutputDescription> iODescr, Optional<NetworkDescription> netDescr, String exportFileNameExt, Map<Integer, double[]> map) {
 
         //runStamp+"_"+exportFileNameExt
         String pathname = egFileReferenceManager.encogFileNameGenerator(iODescr, netDescr)[0]+"_"+exportFileNameExt;
@@ -38,10 +37,10 @@ public class MLDataPairCsvImportExport implements CsvImportExport<MLDataPair> {
             map.entrySet().stream().forEach(entry -> {
 
                 try {
-                    //bufferWriter.write(String.format("%f, ", entry.getKey().getIdealArray()[0]));
-                    double[] ideals = entry.getKey().getIdealArray();
-                    String idealsString = Arrays.toString(ideals);
-                    bufferWriter.write(idealsString.substring(1, idealsString.length() - 1));
+                    //double[] ideals = entry.getKey().getIdealArray();
+                    //String idealsString = Arrays.toString(ideals);
+                    //bufferWriter.write(idealsString.substring(1, idealsString.length() - 1));
+                    bufferWriter.write(entry.getKey());
 
                     bufferWriter.write(", ");
 

@@ -3,8 +3,6 @@ package com.finance.pm.encog;
 import java.util.LinkedHashMap;
 import java.util.Optional;
 
-import org.encog.ml.data.MLDataPair;
-
 import com.finance.pm.encog.application.EncogService;
 import com.finance.pm.encog.guice.EncogServiceModule;
 import com.finance.pm.encog.guice.POCAdapterModule;
@@ -25,12 +23,12 @@ public class Main {
         EncogService encogService = injector.getInstance(EncogService.class);
 
         // Compute
-        LinkedHashMap<MLDataPair, double[]> prediction = encogService
+        LinkedHashMap<Integer, double[]> prediction = encogService
                 .oneFoldTrainAndCompute("?:B->SIGMOID->25:B->SIGMOID->?", 12);
 
         // Export prediction
-        CsvImportExport<MLDataPair> csvImportExport = injector
-                .getInstance(Key.get(new TypeLiteral<CsvImportExport<MLDataPair>>() {}));
+        CsvImportExport<Integer> csvImportExport = injector
+                .getInstance(Key.get(new TypeLiteral<CsvImportExport<Integer>>() {}));
         csvImportExport.exportData(Optional.empty(), Optional.empty(), "prediction", prediction);
 
     }

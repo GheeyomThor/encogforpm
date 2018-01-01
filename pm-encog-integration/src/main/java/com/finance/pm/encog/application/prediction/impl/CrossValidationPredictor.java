@@ -65,7 +65,7 @@ public class CrossValidationPredictor implements NnPredictor {
     }
 
     @Override
-    public LinkedHashMap<MLDataPair, double[]> compute(File trainedEg,  MLDataSet normTrainingSet) {
+    public LinkedHashMap<Integer, double[]> compute(File trainedEg,  MLDataSet normTrainingSet) {
         throw new UnsupportedOperationException();
     }
 

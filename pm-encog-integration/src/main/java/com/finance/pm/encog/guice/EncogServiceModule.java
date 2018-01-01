@@ -2,8 +2,6 @@ package com.finance.pm.encog.guice;
 
 import java.util.Date;
 
-import org.encog.ml.data.MLDataPair;
-
 import com.finance.pm.encog.application.nnetwork.method.NnFactory;
 import com.finance.pm.encog.application.nnetwork.method.impl.GenericFeedForwardNetworkFactory;
 import com.finance.pm.encog.application.nnetwork.propagation.PropagationFactory;
@@ -30,7 +28,7 @@ public class EncogServiceModule extends AbstractModule {
     protected void configure() {
         
         //CSV Import export
-        bind(new TypeLiteral<CsvImportExport<MLDataPair>>() {}).to(MLDataPairCsvImportExport.class);
+        bind(new TypeLiteral<CsvImportExport<Integer>>() {}).to(MLDataPairCsvImportExport.class);
         bind(new TypeLiteral<CsvImportExport<Date>>() {}).to(MapCsvImportExport.class);
         
         //Eg files

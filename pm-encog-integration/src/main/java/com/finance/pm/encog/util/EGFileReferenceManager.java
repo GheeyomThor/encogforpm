@@ -5,6 +5,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -93,6 +98,24 @@ public class EGFileReferenceManager {
             throw new RuntimeException(e);
         }
 
+    }
+
+    //XXX this will only take in account X substitutions for the training end date.
+    public static void invalidateEntries(InputOutputDescription inputOutputDescription, NetworkDescription networkDescription) {
+        
+        Path path = Paths.get(System.getProperty("installdir") + File.separator + "egDescription.txt")  ;
+        try {
+            String content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+            String fileDescrRegExp = (networkDescription.toString() + " " + inputOutputDescription.toString()).replaceAll("X+\\]\\]", "(.*)]]");
+            fileDescrRegExp = fileDescrRegExp.replaceAll("\\[", "\\\\[").replaceAll("\\]", "\\\\]");
+            String endDescr = inputOutputDescription.toString().replaceAll("X+\\]\\]", "\\$1]]");
+            String fileDescrDirtySubstitution = networkDescription.toString() + " " + endDescr+ " YDirtyY";
+            content = content.replaceAll(fileDescrRegExp, fileDescrDirtySubstitution);
+            Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        
     }
 
 }

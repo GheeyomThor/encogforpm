@@ -21,13 +21,14 @@ import com.finance.pm.encog.util.DataSourceAdapter;
  */
 public class GenericPredictor implements NnPredictor {
 
-    public LinkedHashMap<MLDataPair, double[]> compute(File networkFile, MLDataSet trainingSet) {
+    public LinkedHashMap<Integer, double[]> compute(File networkFile, MLDataSet trainingSet) {
 
         MLRegression network = (MLRegression) EncogDirectoryPersistence.loadObject(networkFile);
-        LinkedHashMap<MLDataPair, double[]> outputs = new LinkedHashMap<>();
+        LinkedHashMap<Integer, double[]> outputs = new LinkedHashMap<>();
+        int i = 0;
         for (MLDataPair pair : trainingSet) {
             MLData output = network.compute(pair.getInput());
-            outputs.put(pair, output.getData());
+            outputs.put(i++, output.getData());
         }
 
         return outputs;

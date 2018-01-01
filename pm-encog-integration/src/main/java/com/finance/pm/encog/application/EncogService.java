@@ -3,7 +3,6 @@ package com.finance.pm.encog.application;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +51,7 @@ public class EncogService {
     private NnPredictor crossValidationPredictor;
 
     private EGFileReferenceManager egFileReferenceManager;
-    private CsvImportExport<MLDataPair> normalizedExporter;
+    private CsvImportExport<Integer> normalizedExporter;
 
     @Inject
     public EncogService( 
@@ -63,7 +62,7 @@ public class EncogService {
             @Training DataSetLoader versatileTrainingDataLoader,
             @Named("versatile") NnTrainer crossValidationTrainer,
             @Validation NnPredictor crossValidationPredictor,
-            EGFileReferenceManager egFileReferenceManager, CsvImportExport<MLDataPair> normalizedExporter) {
+            EGFileReferenceManager egFileReferenceManager, CsvImportExport<Integer> normalizedExporter) {
         super();
         this.temporalDataLoader = temporalDataImporter;
         this.networkFactory = networkFactory;
@@ -95,7 +94,7 @@ public class EncogService {
      * @return The predicted output
      * @throws Exception
      */
-    public LinkedHashMap<MLDataPair, double[]> oneFoldTrainAndCompute(String architecture, int lagWindowSize)
+    public LinkedHashMap<Integer, double[]> oneFoldTrainAndCompute(String architecture, int lagWindowSize)
             throws Exception {
 
         LOGGER.info("Importing data");
@@ -111,9 +110,9 @@ public class EncogService {
         File trainedEg = trainer.train(mlTrain, trainingSet, CsvImportExport.runStamp.toString());
 
         LOGGER.info("Running predictions");
-        LinkedHashMap<MLDataPair, double[]> prediction = predictor.compute(trainedEg, trainingSet);
+        LinkedHashMap<Integer, double[]> prediction = predictor.compute(trainedEg, trainingSet);
 
-        LOGGER.info("All done.");
+        LOGGER.info("Encog. One fold Training done.");
         Encog.getInstance().shutdown();
 
         return prediction;
@@ -131,13 +130,14 @@ public class EncogService {
 
         LOGGER.info("Training network using cross validation and find the best method");
         File trainedEg = crossValidationTrainer.train(null, trainingSet, netDescr.getMethodType(), netDescr.getModelArchitecture(), netDescr.getTrainingType(), netDescr.getTrainingArgs(), resultsBaseFileName);
-        exportNormalysed(trainingSet, iODescr, netDescr);
 
         LOGGER.info("Running predictions");
         List<double[]> prediction = crossValidationPredictor.versatileDataSetCompute(trainedEg, trainingSet.getNormHelper(), iODescr.getLagWindowSize());
 
-        LOGGER.info("All done.");
+        LOGGER.info("Encog "+resultsBaseFileName+". Cross Validation Training done.");
         Encog.getInstance().shutdown();
+
+        if (LOGGER.isDebugEnabled()) exportNormalysed(trainingSet, iODescr, netDescr);
 
         return prediction;
 
@@ -145,15 +145,16 @@ public class EncogService {
 
     private void exportNormalysed(VersatileMLDataSet data, InputOutputDescription iODescr, NetworkDescription netDescr ) {
 
-        LinkedHashMap<MLDataPair, double[]> analysedInputs = new LinkedHashMap<>();
-        LinkedHashMap<MLDataPair, double[]> analysedOutputs = new LinkedHashMap<>();
-        Iterator<MLDataPair> dataIterator = data.iterator();
+        LinkedHashMap<Integer, double[]> analysedInputs = new LinkedHashMap<>();
+        LinkedHashMap<Integer, double[]> analysedOutputs = new LinkedHashMap<>();
+        //Iterator<MLDataPair> dataIterator = data.iterator();
+        int i = 0;
         for (MLDataPair pair : data) {
-            double[] in = pair.getInputArray();
-            double[] out = pair.getIdealArray();
-            MLDataPair nextMlDataPair = dataIterator.next();
-            analysedInputs.put(nextMlDataPair, in);
-            analysedOutputs.put(nextMlDataPair, out);
+            //double[] in = pair.getInputArray();
+            //double[] out = pair.getIdealArray();
+            //MLDataPair nextMlDataPair = dataIterator.next();
+            analysedInputs.put(i++, pair.getInputArray());
+            analysedOutputs.put(i, pair.getIdealArray());
         }
         normalizedExporter.exportData(Optional.of(iODescr), Optional.of(netDescr), "trainingInputs_EncogNormalised", analysedInputs);
         normalizedExporter.exportData(Optional.of(iODescr), Optional.of(netDescr), "trainingOutputs_EncogNormalised", analysedOutputs);
@@ -191,7 +192,7 @@ public class EncogService {
 
         }
 
-        LOGGER.info("All done.");
+        LOGGER.info("Encog "+egFileDescr[0]+". Prediction computation done.");
         try {
             Encog.getInstance().shutdown();
         } catch (Exception e) {
