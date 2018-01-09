@@ -5,13 +5,15 @@ import java.util.Arrays;
 import org.encog.ml.data.versatile.columns.ColumnType;
 
 public class InputOutputDescription {
+    private String method;
     private ColumnType inputType;
     private ColumnType outputType;
     private int lagWindowSize;
     private int leadWindowSize;
     private String[] ioCalculationParams;
 
-    public InputOutputDescription(ColumnType inputType, ColumnType outputType, int lagWindowSize, int leadWindowSize, String... ioCalculationParams) {
+    public InputOutputDescription(String method, ColumnType inputType, ColumnType outputType, int lagWindowSize, int leadWindowSize, String... ioCalculationParams) {
+        this.method = method;
         this.inputType = inputType;
         this.outputType = outputType;
         this.lagWindowSize = lagWindowSize;
@@ -38,9 +40,8 @@ public class InputOutputDescription {
     @Override
     public String toString() {
         return String.format(
-                "InputOutputDescription [inputType=%s, outputType=%s, lagWindowSize=%s, leadWindowSize=%s, ioCalculationParams=%s]",
-                inputType, outputType, lagWindowSize, leadWindowSize, Arrays.toString(ioCalculationParams));
+                "InputOutputDescription [method=%s, inputType=%s, outputType=%s, lagWindowSize=%s, leadWindowSize=%s, ioCalculationParams=%s]",
+                method, inputType, outputType, lagWindowSize, leadWindowSize, Arrays.toString(ioCalculationParams));
     }
-    
-    
+
 }

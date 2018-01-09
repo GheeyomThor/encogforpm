@@ -21,23 +21,18 @@ import org.encog.ml.data.versatile.sources.VersatileDataSource;
 public class VersatileMapDataSource implements VersatileDataSource {
 
     private int readingCursor;
-    private int inputSize;
-    private int outputSize;
-
-    List<List<String>> inputsRows;
-    List<List<String>> outputsRows;
+    private int inputRowSize;
+    private int outputRowSize;
+    private List<double[]> trainingInputValues;
+    private List<double[]> trainingIdealValues;
 
     public VersatileMapDataSource(List<double[]> trainingInputValues) {
 
         readingCursor = 0;
 
         double[] inputFirstLine = trainingInputValues.get(0);
-        inputsRows = 
-                trainingInputValues.stream().map(
-                        doubleArray -> Arrays.stream(doubleArray).boxed()
-                        .map(d -> d.toString()).collect(Collectors.toList()))
-                .collect(Collectors.toList());
-        this.inputSize = inputFirstLine.length;
+        this.inputRowSize = inputFirstLine.length;
+        this.trainingInputValues = trainingInputValues;
 
     }
 
@@ -49,42 +44,35 @@ public class VersatileMapDataSource implements VersatileDataSource {
         double[] inputFirstLine = trainingInputValues.get(0);
         double[] outputFirstLine = trainingIdealValues.get(0);
 
-        inputsRows = 
-                trainingInputValues.stream().map(
-                        doubleArray -> Arrays.stream(doubleArray).boxed()
-                        .map(d -> d.toString()).collect(Collectors.toList()))
-                .collect(Collectors.toList());
-        this.inputSize = inputFirstLine.length;
+        this.trainingInputValues = trainingInputValues;
+        this.inputRowSize = inputFirstLine.length;
 
-        outputsRows = 
-                trainingIdealValues.stream().map(
-                        doubleArray -> Arrays.stream(doubleArray).boxed()
-                        .map(d -> d.toString()).collect(Collectors.toList()))
-                .collect(Collectors.toList());
-        this.outputSize = outputFirstLine.length;
+        this.trainingIdealValues = trainingIdealValues;
+        this.outputRowSize = outputFirstLine.length;
 
-        if (this.inputsRows.size() != this.outputsRows.size()) {
+        if (trainingInputValues.size() != trainingIdealValues.size()) {
             throw new RuntimeException("Inconsistent input output sizes");
         }
+        
 
     }
 
     @Override
     public String[] readLine() {
 
-        if(readingCursor == this.inputsRows.size()) return null;
+        if(readingCursor == this.trainingInputValues.size()) return null;
 
         List<String> line = new ArrayList<String>();
 
-        List<String> inputs = this.inputsRows.get(readingCursor);
-        if ( inputs.size() != inputSize ) {
+        List<String> inputs = Arrays.stream(this.trainingInputValues.get(readingCursor)).boxed().map(d -> d.toString()).collect(Collectors.toList());
+        if ( inputs.size() != inputRowSize ) {
             throw new RuntimeException(String.format("Inconsistent learning data set at line %d", readingCursor));
         }
         line.addAll(inputs);
 
-        if (this.outputsRows != null) {
-            List<String> outputs = this.outputsRows.get(readingCursor);
-            if ( outputs.size() != outputSize ) {
+        if (this.trainingIdealValues != null) {
+            List<String> outputs = Arrays.stream(this.trainingIdealValues.get(readingCursor)).boxed().map(d -> d.toString()).collect(Collectors.toList());
+            if ( outputs.size() != outputRowSize ) {
                 throw new RuntimeException(String.format("Inconsistent learning data set at line %d", readingCursor));
             }
             line.addAll(outputs);

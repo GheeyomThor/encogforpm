@@ -1,13 +1,16 @@
 package com.finance.pm.encog.data.impl;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 
 import org.encog.ml.data.versatile.VersatileMLDataSet;
 import org.encog.ml.data.versatile.columns.ColumnDefinition;
 import org.encog.ml.data.versatile.columns.ColumnType;
+import org.encog.ml.data.versatile.sources.CSVDataSource;
 import org.encog.ml.data.versatile.sources.VersatileDataSource;
 import org.encog.ml.model.normalisation.NormalisationStrategySetter;
+import org.encog.util.csv.CSVFormat;
 
 import com.finance.pm.encog.data.DataSetLoader;
 import com.finance.pm.encog.util.CsvImportExport;
@@ -29,11 +32,18 @@ public class VersatileDataSetLoader implements DataSetLoader {
             int lagWindowSize, int leadWindowSize,
             String modelType, String modelArchitecture) {
 
-        List<double[]> trainingInputValues = dataDataAdapter.getTrainingInputs();
-        List<double[]> trainingIdealValues = dataDataAdapter.getTrainingOutputs();
         List<String> inputEventsDescription = dataDataAdapter.getInputEventsDescription();
 
-        VersatileDataSource source = new VersatileMapDataSource(trainingInputValues, trainingIdealValues);
+        VersatileDataSource source;
+        File ioFile = dataDataAdapter.getDataFile();
+        if (ioFile != null) {
+            source = new CSVDataSource(ioFile, false, CSVFormat.DECIMAL_POINT);
+        } else {
+            List<double[]> trainingInputValues = dataDataAdapter.getTrainingInputs();
+            List<double[]> trainingIdealValues = dataDataAdapter.getTrainingOutputs();
+            source = new VersatileMapDataSource(trainingInputValues, trainingIdealValues);
+        }
+
         VersatileMLDataSet dataSet = new VersatileMLDataSet(source);
 
         for (int i = 0; i < inputEventsDescription.size(); i++) {
@@ -48,18 +58,18 @@ public class VersatileDataSetLoader implements DataSetLoader {
         dataSet.analyze();
 
         NormalisationStrategySetter normalisationHelperStrategyBuilder = 
-                            new NormalisationStrategySetter()
-                            .withMethod(modelType)
-                            .withArchitecture(modelArchitecture);
-                           
+                new NormalisationStrategySetter()
+                .withMethod(modelType)
+                .withArchitecture(modelArchitecture);
+
         normalisationHelperStrategyBuilder.setStrategyTo(dataSet);
 
         //Now normalise the data (create a normalised matrix in the VersatileMLDataSet). 
         dataSet.normalize();
-        
+
         dataSet.setLagWindowSize(lagWindowSize);
         dataSet.setLeadWindowSize(leadWindowSize);
-        
+
         return dataSet;
     }
 

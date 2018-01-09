@@ -49,4 +49,9 @@ public class POCDataSourceAdapter implements DataSourceAdapter {
         return new ArrayList<>(mapCsvImportExport.importData(new File(inputs.getPath())).keySet());
     }
 
+    @Override
+    public File getDataFile() {
+        return null;
+    }
+
 }

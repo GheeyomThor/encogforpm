@@ -1,5 +1,6 @@
 package com.finance.pm.encog.util;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -19,5 +20,7 @@ public interface DataSourceAdapter {
     public List<String> getInputEventsDescription();
     
     public  List<Date> getTrainingInputsDatesList();
+
+    public File getDataFile();
 
 }
