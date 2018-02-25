@@ -169,12 +169,14 @@ public class EncogService {
         String[] egFileDescr = egFileReferenceManager.encogFileNameGenerator(Optional.of(iODescription), Optional.of(networkDescription));
         LOGGER.info("Encog file description : "+egFileDescr[1]);
         LOGGER.info("Encog file to be used : "+egFileDescr[0]);
-        File trainedEg = new File(System.getProperty("installdir") + File.separator + egFileDescr[0]+".EG");
+        String egPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + egFileDescr[0]+".EG";
+        File trainedEg = new File(egPath);
         if (trainedEg.exists()) {
 
             LOGGER.info("File "+trainedEg.getAbsolutePath()+" was found on the file system : re using");
 
-            try (FileInputStream fis = new FileInputStream(egFileDescr[0]+".Norm"); ObjectInputStream objectInputStream = new ObjectInputStream(fis)) {
+            String normPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + egFileDescr[0]+".Norm";
+            try (FileInputStream fis = new FileInputStream(normPath); ObjectInputStream objectInputStream = new ObjectInputStream(fis)) {
 
                 NormalizationHelper normHelper = (NormalizationHelper) objectInputStream.readObject();
 

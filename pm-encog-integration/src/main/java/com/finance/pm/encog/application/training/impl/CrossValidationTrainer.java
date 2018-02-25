@@ -73,7 +73,7 @@ public class CrossValidationTrainer implements NnTrainer {
             // Display the final model.
             report.finalModel(bestMethod);
 
-            String egPathName = System.getProperty("installdir") + File.separator + resultBaseFileName + ".EG";
+            String egPathName = System.getProperty("installdir") + File.separator + "neural" + File.separator + resultBaseFileName + ".EG";
             LOGGER.info("Saving training network in " + egPathName);
             File egFile = new File(egPathName);
             try {
@@ -83,7 +83,7 @@ public class CrossValidationTrainer implements NnTrainer {
                 throw new RuntimeException(e1);
             }
 
-            String normPathName = System.getProperty("installdir") + File.separator + resultBaseFileName + ".Norm";
+            String normPathName = System.getProperty("installdir") + File.separator + "neural" + File.separator + resultBaseFileName + ".Norm";
             LOGGER.info("Saving training normaliser in " + normPathName);
             File normFile = new File(normPathName);
             try (FileOutputStream fos = new FileOutputStream(normFile); ObjectOutputStream objectOutputStream = new ObjectOutputStream(fos)) {

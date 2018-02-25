@@ -18,7 +18,7 @@ public class LogStatusReportable implements StatusReportable, Closeable {
     private BufferedWriter bufferedWriter;
 
     public LogStatusReportable(String resultBaseFileName) throws IOException {
-        File rFile = new File(System.getProperty("installdir") + File.separator + resultBaseFileName + ".txt");
+        File rFile = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + resultBaseFileName + ".txt");
         bufferedWriter = new BufferedWriter(new FileWriter(rFile));
     }
 

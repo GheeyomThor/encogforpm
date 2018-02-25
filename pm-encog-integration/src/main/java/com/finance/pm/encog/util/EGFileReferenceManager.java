@@ -59,7 +59,7 @@ public class EGFileReferenceManager {
 
         //Check existing(and return latest)
         String fileDescr = networkDescription.toString() + " " + inputOutputDescription.toString();
-        File egDescription = new File(System.getProperty("installdir") + File.separator + "egDescription.txt");
+        File egDescription = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + "egDescription.txt");
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(egDescription))) {
             String line = null;
             while ((line = bufferedReader.readLine()) != null) {
@@ -90,7 +90,7 @@ public class EGFileReferenceManager {
     void updateEncogFileNameDescriptions(String[] entryDescr) {
 
         LOGGER.info("Adding new entry for description "+entryDescr[1]+ " :\n\t " +entryDescr[0]);
-        File egDescription = new File(System.getProperty("installdir") + File.separator + "egDescription.txt");
+        File egDescription = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + "egDescription.txt");
         try (BufferedWriter bufferedReader = new BufferedWriter(new FileWriter(egDescription, true))) {
             bufferedReader.write(entryDescr[1]);
             bufferedReader.newLine();
@@ -100,10 +100,16 @@ public class EGFileReferenceManager {
 
     }
 
-    //XXX this will only take in account X substitutions for the training end date.
+    /** 
+     * XXX: This will only take in account X substitutions for the training end date.
+     * And should be called with XXXXXXXX date mask to invalidate all entries matching.
+     * @param inputOutputDescription
+     * @param networkDescription
+     */
+    //FIXME skip already dirty lines (using & at ending of "(.*)]]" ??)
     public static void invalidateEntries(InputOutputDescription inputOutputDescription, NetworkDescription networkDescription) {
         
-        Path path = Paths.get(System.getProperty("installdir") + File.separator + "egDescription.txt")  ;
+        Path path = Paths.get(System.getProperty("installdir") + File.separator + "neural" + File.separator + "egDescription.txt")  ;
         try {
             String content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
             String fileDescrRegExp = (networkDescription.toString() + " " + inputOutputDescription.toString()).replaceAll("X+\\]\\]", "(.*)]]");

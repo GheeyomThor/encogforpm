@@ -29,7 +29,7 @@ public class MLDataPairCsvImportExport implements CsvImportExport<Integer> {
 
         //runStamp+"_"+exportFileNameExt
         String pathname = egFileReferenceManager.encogFileNameGenerator(iODescr, netDescr)[0]+"_"+exportFileNameExt;
-        File exportFile = new File(System.getProperty("installdir")+File.separator+pathname+".csv");
+        File exportFile = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + pathname+".csv");
 
         try (FileWriter fileWriter = new FileWriter(exportFile);
                 BufferedWriter bufferWriter = new BufferedWriter(fileWriter)) {
