@@ -44,6 +44,11 @@ public class LogStatusReportable implements StatusReportable, Closeable {
     public void helper(String helper) {
         print("Helper : "+helper);
     }
+	
+	public void sizes(int totalInputRows, int trainingSize, int validationSize) {
+		print("Training input size (nb rows) : " + totalInputRows+ ", inc. : training folds : "+trainingSize+ " and validation fold "+validationSize);
+		
+	}
     
     public void print(Object ... objects) {
         Arrays.asList(objects).stream().forEach( o -> {
@@ -61,5 +66,7 @@ public class LogStatusReportable implements StatusReportable, Closeable {
     public void close() throws IOException {
        bufferedWriter.close();
     }
+
+
 
 }

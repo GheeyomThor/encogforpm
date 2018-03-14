@@ -43,6 +43,7 @@ public class CrossValidationTrainer implements NnTrainer {
             // Shuffle the data into a random ordering.
             // Use a seed of 1001 so that we always use the same holdback and will
             // get more consistent results.
+            //int randomInt = ThreadLocalRandom.current().nextInt(42, 42*1000 + 1);
             model.holdBackValidation(0.3, false, 1001);
 
             TrainingSpecificationBuilder methodSpecificationBuilder = new TrainingSpecificationBuilder()
@@ -72,6 +73,9 @@ public class CrossValidationTrainer implements NnTrainer {
 
             // Display the final model.
             report.finalModel(bestMethod);
+
+            //Inputs sizes
+            report.sizes(dataSet.size(), model.getTrainingDataset().size(), model.getValidationDataset().size());
 
             String egPathName = System.getProperty("installdir") + File.separator + "neural" + File.separator + resultBaseFileName + ".EG";
             LOGGER.info("Saving training network in " + egPathName);
