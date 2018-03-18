@@ -53,7 +53,7 @@ public class VersatileDataSetLoader implements DataSetLoader {
         ColumnDefinition outputColumn = dataSet.defineSourceColumn("trends", inputEventsDescription.size(), outputColumnType);
         dataSet.defineSingleOutputOthersInput(outputColumn);
 
-        // Analyze the data, determine the min/max/mean/sd of every column.
+        //Analyze the data, determine the min/max/mean/sd of every column.
         //This is done using the VersatileDataSource for data source and NormalizationHelper data description
         dataSet.analyze();
 

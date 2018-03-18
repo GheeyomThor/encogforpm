@@ -51,7 +51,7 @@ public class VersatileMapDataSource implements VersatileDataSource {
         this.outputRowSize = outputFirstLine.length;
 
         if (trainingInputValues.size() != trainingIdealValues.size()) {
-            throw new RuntimeException("Inconsistent input output sizes");
+            throw new RuntimeException("Inconsistent input output sizes: inputs "+trainingInputValues.size()+" and ideals "+trainingIdealValues.size());
         }
         
 

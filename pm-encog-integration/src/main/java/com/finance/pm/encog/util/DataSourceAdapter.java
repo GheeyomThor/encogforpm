@@ -15,8 +15,7 @@ public interface DataSourceAdapter {
 
     public List<double[]> getTrainingInputs();
 
-    // For convenience only as the size of input can derived from the training
-    // input Map
+    //For convenience only as the size of input can derived from the training input Map
     public List<String> getInputEventsDescription();
     
     public  List<Date> getTrainingInputsDatesList();
