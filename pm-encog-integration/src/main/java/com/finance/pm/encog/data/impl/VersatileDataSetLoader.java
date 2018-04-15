@@ -73,4 +73,9 @@ public class VersatileDataSetLoader implements DataSetLoader {
         return dataSet;
     }
 
+	@Override
+	public DataSourceAdapter getPmDataAdapter() {
+		return this.dataDataAdapter;
+	}
+
 }

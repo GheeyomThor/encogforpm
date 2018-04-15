@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 import org.encog.ml.MLRegression;
 import org.encog.ml.data.MLData;
@@ -47,25 +48,35 @@ public class CrossValidationPredictor implements NnPredictor {
         while((line = source.readLine()) != null) {
 
             normHelper.normalizeInputVector(line, slice, true);
+
+            Optional<double[]> checkAndCompute = checkAndCompute(normHelper, network, window, input);
+            checkAndCompute.ifPresent(r -> result.add(r));
+
             window.add(slice);
 
-            if (window.isReady()) {
-                window.copyWindow(input.getData(), 0);
-                MLData output = network.compute(input);
-
-                String[] predictedStr = normHelper.denormalizeOutputVectorToString(output);
-                //System.out.println(output);
-                double[] predicted =  Arrays.stream(predictedStr).mapToDouble(Double::parseDouble).toArray();
-                result.add(predicted);
-            }
-
         }
+
+        Optional<double[]> checkAndCompute = checkAndCompute(normHelper, network, window, input);
+        checkAndCompute.ifPresent(r -> result.add(r));
 
         return result;
     }
 
+	private Optional<double[]> checkAndCompute(NormalizationHelper normHelper, MLRegression network, VectorWindow window, MLData input) {
+		if (window.isReady()) {
+		    window.copyWindow(input.getData(), 0);
+		    MLData output = network.compute(input);
+
+		    String[] predictedStr = normHelper.denormalizeOutputVectorToString(output);
+		    //System.out.println(output);
+		    double[] predicted =  Arrays.stream(predictedStr).mapToDouble(Double::parseDouble).toArray();
+		    return Optional.of(predicted);
+		}
+		return Optional.empty();
+	}
+
     @Override
-    public LinkedHashMap<Integer, double[]> compute(File trainedEg,  MLDataSet normTrainingSet) {
+    public List<double[]> compute(File trainedEg,  MLDataSet normTrainingSet) {
         throw new UnsupportedOperationException();
     }
 

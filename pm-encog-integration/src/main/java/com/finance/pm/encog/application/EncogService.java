@@ -15,7 +15,6 @@ import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.versatile.NormalizationHelper;
 import org.encog.ml.data.versatile.VersatileMLDataSet;
-import org.encog.ml.data.versatile.columns.ColumnType;
 import org.encog.ml.train.MLTrain;
 
 import com.finance.pm.encog.application.nnetwork.PropagationTrainingBuilder;
@@ -36,173 +35,175 @@ import com.google.inject.name.Named;
  */
 public class EncogService {
 
-    private static Logger LOGGER = Logger.getLogger(EncogService.class);
+	private static Logger LOGGER = Logger.getLogger(EncogService.class);
 
-    private DataSetLoader temporalDataLoader;
+	private DataSetLoader oneFoldTemporalDataLoader;
 
-    private DataSetLoader versatileTrainingDataLoader;
+	private DataSetLoader versatileTrainingDataLoader;
 
-    private NnFactory networkFactory;
-    private PropagationFactory propagationFactory;
-    private NnTrainer trainer;
-    private NnTrainer crossValidationTrainer;
+	private NnFactory ofNetworkFactory;
+	private PropagationFactory ofPropagationFactory;
+	private NnTrainer oneFoldTrainer;
+	private NnTrainer crossValidationTrainer;
 
-    private NnPredictor predictor;
-    private NnPredictor crossValidationPredictor;
+	private NnPredictor oneFoldPredictor;
+	private NnPredictor crossValidationPredictor;
 
-    private EGFileReferenceManager egFileReferenceManager;
-    private CsvImportExport<Integer> normalizedExporter;
+	private EGFileReferenceManager egFileReferenceManager;
+	private CsvImportExport<Integer> normalizedExporter;
 
-    @Inject
-    public EncogService( 
-            NnFactory networkFactory, PropagationFactory propagationFactory, 
-            @Temporal DataSetLoader temporalDataImporter,
-            @Named("temporal") NnTrainer trainer,
-            @Named("temporal") NnPredictor predictor,
-            @Training DataSetLoader versatileTrainingDataLoader,
-            @Named("versatile") NnTrainer crossValidationTrainer,
-            @Validation NnPredictor crossValidationPredictor,
-            EGFileReferenceManager egFileReferenceManager, CsvImportExport<Integer> normalizedExporter) {
-        super();
-        this.temporalDataLoader = temporalDataImporter;
-        this.networkFactory = networkFactory;
-        this.propagationFactory = propagationFactory;
-        this.trainer = trainer;
-        this.predictor = predictor;
+	@Inject
+	public EncogService( 
+			NnFactory networkFactory, PropagationFactory propagationFactory, 
+			@Temporal DataSetLoader oneFoldTemporalDataLoader,
+			@Named("temporal") NnTrainer oneFoldTrainer,
+			@Named("temporal") NnPredictor oneFoldPredictor,
 
-        this.versatileTrainingDataLoader = versatileTrainingDataLoader;
-        this.crossValidationTrainer = crossValidationTrainer;
-        this.crossValidationPredictor = crossValidationPredictor;
+			@Training DataSetLoader versatileTrainingDataLoader,
+			@Named("versatile") NnTrainer crossValidationTrainer,
+			@Validation NnPredictor crossValidationPredictor,
 
-        this.egFileReferenceManager = egFileReferenceManager;
-        this.normalizedExporter = normalizedExporter;
+			EGFileReferenceManager egFileReferenceManager, CsvImportExport<Integer> normalizedExporter) {
 
-    }
+		super();
+		this.ofNetworkFactory = networkFactory;
+		this.ofPropagationFactory = propagationFactory;
+		this.oneFoldTemporalDataLoader = oneFoldTemporalDataLoader;
+		this.oneFoldTrainer = oneFoldTrainer;
+		this.oneFoldPredictor = oneFoldPredictor;
 
-    /**
-     * A one of train and predict computation. Mainly for proof of concept
-     * 
-     * @param architecture
-     *            For example "? : B−>SIGMOID−>4:B−>SIGMOID−>?" will create a
-     *            neural network.</br>
-     *            see
-     *            {@link com.finance.pm.encog.application.nnetwork.method.impl.GenericFeedForwardNetworkFactory}
-     * @param inputSize
-     *            input layer size. The output layer size is fixed to one.
-     * @param lagWindowSize
-     *            see {@link DataSetLoader}
-     * @return The predicted output
-     * @throws Exception
-     */
-    public LinkedHashMap<Integer, double[]> oneFoldTrainAndCompute(String architecture, int lagWindowSize)
-            throws Exception {
+		this.versatileTrainingDataLoader = versatileTrainingDataLoader;
+		this.crossValidationTrainer = crossValidationTrainer;
+		this.crossValidationPredictor = crossValidationPredictor;
 
-        LOGGER.info("Importing data");
-        MLDataSet trainingSet = temporalDataLoader.loadData(ColumnType.continuous, ColumnType.nominal, lagWindowSize,
-                1);
+		this.egFileReferenceManager = egFileReferenceManager;
+		this.normalizedExporter = normalizedExporter;
 
-        LOGGER.info("Creating network method and training");
-        MLTrain mlTrain = new PropagationTrainingBuilder().withMethodFactory(networkFactory)
-                .withArchitecture(architecture).withDataSet(trainingSet).withPropagationFactory(propagationFactory)
-                .build();
+	}
 
-        LOGGER.info("Training network");
-        File trainedEg = trainer.train(mlTrain, trainingSet, CsvImportExport.runStamp.toString());
+	/**
+	 * A one of train and predict computation. Mainly for proof of concept
+	 * 
+	 * @param architecture
+	 *            For example "? : B−>SIGMOID−>4:B−>SIGMOID−>?" will create a
+	 *            neural network.</br>
+	 *            see
+	 *            {@link com.finance.pm.encog.application.nnetwork.method.impl.GenericFeedForwardNetworkFactory}
+	 * @param inputSize
+	 *            input layer size. The output layer size is fixed to one.
+	 * @param lagWindowSize
+	 *            see {@link DataSetLoader}
+	 * @return The predicted output
+	 * @throws Exception
+	 */
+	public List<double[]> oneFoldTrainAndCompute(InputOutputDescription iODescription, NetworkDescription networkDescription, String resultsBaseFileName)
+			throws Exception {
 
-        LOGGER.info("Running predictions");
-        LinkedHashMap<Integer, double[]> prediction = predictor.compute(trainedEg, trainingSet);
+		LOGGER.info("Importing data");
+		MLDataSet trainingSet = oneFoldTemporalDataLoader.loadData(iODescription.getInputType(), iODescription.getOutputType(), iODescription.getLagWindowSize(), iODescription.getLeadWindowSize());
 
-        LOGGER.info("Encog. One fold Training done.");
-        Encog.getInstance().shutdown();
+		LOGGER.info("Creating network method and training");
+		//TODO remove guice injection and use MLTrainFactory.create instead to pickup the correct method and propagation
+		MLTrain mlTrain = new PropagationTrainingBuilder()
+				.withMethodFactory(ofNetworkFactory).withArchitecture(networkDescription.getModelArchitecture())
+				.withDataSet(trainingSet).withPropagationFactory(ofPropagationFactory)
+				.build();
 
-        return prediction;
+		LOGGER.info("Training network");
+		File trainedEg = oneFoldTrainer.train(mlTrain, trainingSet, resultsBaseFileName);
 
-    }
+		LOGGER.info("Running predictions");
+		List<double[]> prediction = oneFoldPredictor.compute(trainedEg, trainingSet);
 
-    public List<double[]> crossValidationAndCompute(
-            InputOutputDescription iODescr, NetworkDescription netDescr,
-            String resultsBaseFileName) throws Exception {
+		LOGGER.info("Encog. One fold Training done.");
+		Encog.getInstance().shutdown();
 
-        LOGGER.info("Importing Training data");
-        VersatileMLDataSet trainingSet = 
-                (VersatileMLDataSet) versatileTrainingDataLoader
-                .loadData(iODescr.getInputType(), iODescr.getOutputType(), iODescr.getLagWindowSize(), iODescr.getLeadWindowSize(), netDescr.getMethodType(), netDescr.getModelArchitecture());
+		return prediction;
 
-        LOGGER.info("Training network using cross validation and find the best method");
-        File trainedEg = crossValidationTrainer.train(null, trainingSet, netDescr.getMethodType(), netDescr.getModelArchitecture(), netDescr.getTrainingType(), netDescr.getTrainingArgs(), resultsBaseFileName);
+	}
 
-        LOGGER.info("Running predictions");
-        List<double[]> prediction = crossValidationPredictor.versatileDataSetCompute(trainedEg, trainingSet.getNormHelper(), iODescr.getLagWindowSize());
+	public List<double[]> crossValidationAndCompute(
+			InputOutputDescription iODescr, NetworkDescription netDescr,
+			String resultsBaseFileName) throws Exception {
 
-        LOGGER.info("Encog "+resultsBaseFileName+". Cross Validation Training done.");
-        Encog.getInstance().shutdown();
+		//if (iODescr.getLeadWindowSize() > 1) throw new OperationNotSupportedException();
 
-        if (LOGGER.isDebugEnabled()) exportNormalysed(trainingSet, iODescr, netDescr);
+		LOGGER.info("Importing Training data");
+		VersatileMLDataSet trainingSet = 
+				(VersatileMLDataSet) versatileTrainingDataLoader
+				.loadData(iODescr.getInputType(), iODescr.getOutputType(), iODescr.getLagWindowSize(), iODescr.getLeadWindowSize(), netDescr.getMethodType(), netDescr.getModelArchitecture());
 
-        return prediction;
+		LOGGER.info("Training network using cross validation and find the best method");
+		File trainedEg = crossValidationTrainer.train(null, trainingSet, netDescr.getMethodType(), netDescr.getModelArchitecture(), netDescr.getTrainingType(), netDescr.getTrainingArgs(), resultsBaseFileName);
 
-    }
+		LOGGER.info("Running predictions");
+		List<double[]> prediction = crossValidationPredictor.versatileDataSetCompute(trainedEg, trainingSet.getNormHelper(), iODescr.getLagWindowSize());
 
-    private void exportNormalysed(VersatileMLDataSet data, InputOutputDescription iODescr, NetworkDescription netDescr ) {
+		LOGGER.info("Encog "+resultsBaseFileName+". Cross Validation Training done.");
+		Encog.getInstance().shutdown();
 
-        LinkedHashMap<Integer, double[]> analysedInputs = new LinkedHashMap<>();
-        LinkedHashMap<Integer, double[]> analysedOutputs = new LinkedHashMap<>();
-        //Iterator<MLDataPair> dataIterator = data.iterator();
-        int i = 0;
-        for (MLDataPair pair : data) {
-            //double[] in = pair.getInputArray();
-            //double[] out = pair.getIdealArray();
-            //MLDataPair nextMlDataPair = dataIterator.next();
-            analysedInputs.put(i++, pair.getInputArray());
-            analysedOutputs.put(i, pair.getIdealArray());
-        }
-        normalizedExporter.exportData(Optional.of(iODescr), Optional.of(netDescr), "trainingInputs_EncogNormalised", analysedInputs);
-        normalizedExporter.exportData(Optional.of(iODescr), Optional.of(netDescr), "trainingOutputs_EncogNormalised", analysedOutputs);
+		if (LOGGER.isDebugEnabled()) exportNormalysed(trainingSet, iODescr, netDescr);
 
-    }
+		return prediction;
+
+	}
+
+	private void exportNormalysed(MLDataSet data, InputOutputDescription iODescr, NetworkDescription netDescr ) {
+
+		LinkedHashMap<Integer, double[]> analysedInputs = new LinkedHashMap<>();
+		LinkedHashMap<Integer, double[]> analysedOutputs = new LinkedHashMap<>();
+		int i = 0;
+		for (MLDataPair pair : data) {
+			analysedInputs.put(i++, pair.getInputArray());
+			analysedOutputs.put(i, pair.getIdealArray());
+		}
+		normalizedExporter.exportData(Optional.of(iODescr), Optional.of(netDescr), "trainingInputs_EncogNormalised", analysedInputs);
+		normalizedExporter.exportData(Optional.of(iODescr), Optional.of(netDescr), "trainingOutputs_EncogNormalised", analysedOutputs);
+
+	}
 
 
-    public List<double[]> trainForNewOnlyAndcompute(InputOutputDescription iODescription, NetworkDescription networkDescription) throws Exception {
+	public List<double[]> trainForNewOnlyAndcompute(InputOutputDescription iODescription, NetworkDescription networkDescription) throws Exception {
 
-        List<double[]> prediction;
+		List<double[]> prediction;
 
-        String[] egFileDescr = egFileReferenceManager.encogFileNameGenerator(Optional.of(iODescription), Optional.of(networkDescription));
-        LOGGER.info("Encog file description : "+egFileDescr[1]);
-        LOGGER.info("Encog file to be used : "+egFileDescr[0]);
-        String egPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + egFileDescr[0]+".EG";
-        File trainedEg = new File(egPath);
-        if (trainedEg.exists()) {
+		String[] egFileDescr = egFileReferenceManager.encogFileNameGenerator(Optional.of(iODescription), Optional.of(networkDescription));
+		LOGGER.info("Encog file description : "+egFileDescr[1]);
+		LOGGER.info("Encog file to be used : "+egFileDescr[0]);
+		String egPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + egFileDescr[0]+".EG";
+		File trainedEg = new File(egPath);
+		if (trainedEg.exists()) {
 
-            LOGGER.info("File "+trainedEg.getAbsolutePath()+" was found on the file system : re using");
+			LOGGER.info("File "+trainedEg.getAbsolutePath()+" was found on the file system : re using");
 
-            String normPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + egFileDescr[0]+".Norm";
-            try (FileInputStream fis = new FileInputStream(normPath); ObjectInputStream objectInputStream = new ObjectInputStream(fis)) {
+			String normPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + egFileDescr[0]+".Norm";
+			try (FileInputStream fis = new FileInputStream(normPath); ObjectInputStream objectInputStream = new ObjectInputStream(fis)) {
 
-                NormalizationHelper normHelper = (NormalizationHelper) objectInputStream.readObject();
+				NormalizationHelper normHelper = (NormalizationHelper) objectInputStream.readObject();
 
-                LOGGER.info("Running predictions");
-                prediction = crossValidationPredictor.versatileDataSetCompute(trainedEg, normHelper, iODescription.getLagWindowSize());
+				LOGGER.info("Running predictions");
+				prediction = crossValidationPredictor.versatileDataSetCompute(trainedEg, normHelper, iODescription.getLagWindowSize());
 
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 
-        } else {
+		} else {
 
-            LOGGER.info("File "+trainedEg.getAbsolutePath()+" was NOT found on the file system : retraining");
-            prediction = crossValidationAndCompute(iODescription, networkDescription, egFileDescr[0]);
+			LOGGER.info("File "+trainedEg.getAbsolutePath()+" was NOT found on the file system : retraining");
+			prediction = crossValidationAndCompute(iODescription, networkDescription, egFileDescr[0]);
 
-        }
+		}
 
-        LOGGER.info("Encog "+egFileDescr[0]+". Prediction computation done.");
-        try {
-            Encog.getInstance().shutdown();
-        } catch (Exception e) {
-            LOGGER.warn("Encog service did an improper shutdown", e);
-        }
+		LOGGER.info("Encog "+egFileDescr[0]+". Prediction computation done.");
+		try {
+			Encog.getInstance().shutdown();
+		} catch (Exception e) {
+			LOGGER.warn("Encog service did an improper shutdown", e);
+		}
 
-        return prediction;
+		return prediction;
 
-    }
+	}
 
 }

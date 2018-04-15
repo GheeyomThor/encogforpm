@@ -1,6 +1,7 @@
 package com.finance.pm.encog.application.prediction.impl;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -21,18 +22,15 @@ import com.finance.pm.encog.util.DataSourceAdapter;
  */
 public class GenericPredictor implements NnPredictor {
 
-    public LinkedHashMap<Integer, double[]> compute(File networkFile, MLDataSet trainingSet) {
+    public List<double[]> compute(File networkFile, MLDataSet trainingSet) {
 
         MLRegression network = (MLRegression) EncogDirectoryPersistence.loadObject(networkFile);
-        LinkedHashMap<Integer, double[]> outputs = new LinkedHashMap<>();
-        int i = 0;
+        List<double[]> outputs = new ArrayList<>();
         for (MLDataPair pair : trainingSet) {
             MLData output = network.compute(pair.getInput());
-            outputs.put(i++, output.getData());
+            outputs.add(output.getData());
         }
-
         return outputs;
-
     }
 
     @Override

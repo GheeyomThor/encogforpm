@@ -20,77 +20,77 @@ import org.encog.ml.data.versatile.sources.VersatileDataSource;
  */
 public class VersatileMapDataSource implements VersatileDataSource {
 
-    private int readingCursor;
-    private int inputRowSize;
-    private int outputRowSize;
-    private List<double[]> trainingInputValues;
-    private List<double[]> trainingIdealValues;
+	private int readingCursor;
+	private int inputRowSize;
+	private int outputRowSize;
+	private List<double[]> trainingInputValues;
+	private List<double[]> trainingIdealValues;
 
-    public VersatileMapDataSource(List<double[]> trainingInputValues) {
+	public VersatileMapDataSource(List<double[]> trainingInputValues) {
 
-        readingCursor = 0;
+		readingCursor = 0;
 
-        double[] inputFirstLine = trainingInputValues.get(0);
-        this.inputRowSize = inputFirstLine.length;
-        this.trainingInputValues = trainingInputValues;
+		double[] inputFirstLine = trainingInputValues.get(0);
+		this.inputRowSize = inputFirstLine.length;
+		this.trainingInputValues = trainingInputValues;
 
-    }
+	}
 
 
-    public VersatileMapDataSource(List<double[]> trainingInputValues, List<double[]> trainingIdealValues) {
+	public VersatileMapDataSource(List<double[]> trainingInputValues, List<double[]> trainingIdealValues) {
 
-        readingCursor = 0;
+		readingCursor = 0;
 
-        double[] inputFirstLine = trainingInputValues.get(0);
-        double[] outputFirstLine = trainingIdealValues.get(0);
+		double[] inputFirstLine = trainingInputValues.get(0);
+		double[] outputFirstLine = trainingIdealValues.get(0);
 
-        this.trainingInputValues = trainingInputValues;
-        this.inputRowSize = inputFirstLine.length;
+		this.trainingInputValues = trainingInputValues;
+		this.inputRowSize = inputFirstLine.length;
 
-        this.trainingIdealValues = trainingIdealValues;
-        this.outputRowSize = outputFirstLine.length;
+		this.trainingIdealValues = trainingIdealValues;
+		this.outputRowSize = outputFirstLine.length;
 
-        if (trainingInputValues.size() != trainingIdealValues.size()) {
-            throw new RuntimeException("Inconsistent input output sizes: inputs "+trainingInputValues.size()+" and ideals "+trainingIdealValues.size());
-        }
-        
+		if (trainingInputValues.size() != trainingIdealValues.size()) {
+			throw new RuntimeException("Inconsistent input output sizes: inputs "+trainingInputValues.size()+" and ideals "+trainingIdealValues.size());
+		}
 
-    }
 
-    @Override
-    public String[] readLine() {
+	}
 
-        if(readingCursor == this.trainingInputValues.size()) return null;
+	@Override
+	public String[] readLine() {
 
-        List<String> line = new ArrayList<String>();
+		if(readingCursor == this.trainingInputValues.size()) return null;
 
-        List<String> inputs = Arrays.stream(this.trainingInputValues.get(readingCursor)).boxed().map(d -> d.toString()).collect(Collectors.toList());
-        if ( inputs.size() != inputRowSize ) {
-            throw new RuntimeException(String.format("Inconsistent learning data set at line %d", readingCursor));
-        }
-        line.addAll(inputs);
+		List<String> line = new ArrayList<String>();
 
-        if (this.trainingIdealValues != null) {
-            List<String> outputs = Arrays.stream(this.trainingIdealValues.get(readingCursor)).boxed().map(d -> d.toString()).collect(Collectors.toList());
-            if ( outputs.size() != outputRowSize ) {
-                throw new RuntimeException(String.format("Inconsistent learning data set at line %d", readingCursor));
-            }
-            line.addAll(outputs);
-        }
+		List<String> inputs = Arrays.stream(this.trainingInputValues.get(readingCursor)).boxed().map(d -> d.toString()).collect(Collectors.toList());
+		if ( inputs.size() != inputRowSize ) {
+			throw new RuntimeException(String.format("Inconsistent learning data set at line %d", readingCursor));
+		}
+		line.addAll(inputs);
 
-        readingCursor++;
+		if (this.trainingIdealValues != null) {
+			List<String> outputs = Arrays.stream(this.trainingIdealValues.get(readingCursor)).boxed().map(d -> d.toString()).collect(Collectors.toList());
+			if ( outputs.size() != outputRowSize ) {
+				throw new RuntimeException(String.format("Inconsistent learning data set at line %d", readingCursor));
+			}
+			line.addAll(outputs);
+		}
 
-        return line.toArray(new String[0]);
-    }
+		readingCursor++;
 
-    @Override
-    public void rewind() {
-        readingCursor = 0;
-    }
+		return line.toArray(new String[0]);
+	}
 
-    @Override
-    public int columnIndex(String name) {
-        return -1;
-    }
+	@Override
+	public void rewind() {
+		readingCursor = 0;
+	}
+
+	@Override
+	public int columnIndex(String name) {
+		return -1;
+	}
 
 }

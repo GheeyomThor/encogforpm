@@ -20,7 +20,7 @@ import org.encog.util.simple.EncogUtility;
 import com.finance.pm.encog.application.training.NnTrainer;
 import com.finance.pm.encog.util.LogStatusReportable;
 
-//TODO add flexibility for the choice or TrainingType and normalisation
+//TODO add flexibility for the choice or TrainingType and normalization
 public class CrossValidationTrainer implements NnTrainer {
 
     private static Logger LOGGER = Logger.getLogger(CrossValidationTrainer.class);
@@ -64,6 +64,7 @@ public class CrossValidationTrainer implements NnTrainer {
 
             // Use a 5-fold cross-validated train. Return the best method found.
             MLRegression bestMethod = (MLRegression) model.crossvalidate(5, false);
+            //MLRegression bestMethod = (MLRegression) myCrossValidate(model, trainingSpec.getTrainingType(), trainingSpec.getTrainingArgs(), 5, false);
 
             // Display the training and validation errors.
             report.regressionError(EncogUtility.calculateRegressionError(bestMethod, model.getTrainingDataset()), EncogUtility.calculateRegressionError(bestMethod, model.getValidationDataset()));

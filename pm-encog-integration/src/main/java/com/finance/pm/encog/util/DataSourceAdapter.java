@@ -22,4 +22,8 @@ public interface DataSourceAdapter {
 
     public File getDataFile();
 
+	public default double getTrainFoldsRatio() {
+		return 1d;
+	};
+
 }

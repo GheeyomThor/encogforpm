@@ -26,7 +26,7 @@ public interface NnPredictor {
      *            Input data
      * @return predicted output data
      */
-    LinkedHashMap<Integer, double[]> compute(File trainedEg, MLDataSet trainingSet);
+	List<double[]> compute(File trainedEg, MLDataSet trainingSet);
     
     List<double[]> versatileDataSetCompute(File trainedEg, NormalizationHelper normHelper, int lagWindowSize);
 

@@ -2,7 +2,8 @@ package com.finance.pm.encog.data;
 
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.versatile.columns.ColumnType;
-import org.encog.ml.factory.MLMethodFactory;
+
+import com.finance.pm.encog.util.DataSourceAdapter;
 
 /**
  * This will import the training input data and their corresponding ideals into
@@ -19,7 +20,7 @@ public interface DataSetLoader {
             ColumnType inputColumnType, ColumnType outputColumnType, 
             int lagWindowSize, int leadWindowSize) {
 
-        return this.loadData(inputColumnType, outputColumnType, lagWindowSize, leadWindowSize, MLMethodFactory.TYPE_FEEDFORWARD, null);
+        return this.loadData(inputColumnType, outputColumnType, lagWindowSize, leadWindowSize, null, null);
 
     }
 
@@ -27,5 +28,7 @@ public interface DataSetLoader {
             ColumnType inputColumnType, ColumnType outputColumnType, 
             int lagWindosSize, int predictWindowSize,
             String typeFeedforward, String modelArchitecture);
+
+	DataSourceAdapter getPmDataAdapter();
 
 }
