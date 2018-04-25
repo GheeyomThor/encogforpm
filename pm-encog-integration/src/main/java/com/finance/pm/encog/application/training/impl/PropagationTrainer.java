@@ -17,7 +17,7 @@ public class PropagationTrainer implements NnTrainer {
 	
 	private static Logger LOGGER = Logger.getLogger(PropagationTrainer.class);
 
-	private static final int MAX_ITERATIONS = 1500;
+	private static final int MAX_ITERATIONS = 1000;
 
 	@Override
 	public File train(MLTrain mlTrain, MLDataSet trainingSet,

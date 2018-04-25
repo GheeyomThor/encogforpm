@@ -101,12 +101,13 @@ public class EGFileReferenceManager {
     }
 
     /** 
-     * XXX: This will only take in account X substitutions for the training end date.
-     * And should be called with XXXXXXXX date mask to invalidate all entries matching.
+     * XXX: This will only take in account XXXXXXXX substitution mask for the training end date (as the mask may be applied else where as well?)
+     * It should be called with XXXXXXXX date mask to invalidate all entries matching.
      * @param inputOutputDescription
      * @param networkDescription
      */
     //FIXME skip already dirty lines (using & at ending of "(.*)]]" ??)
+    //FIXME this implies the last discriminator is also the training date or a date mask XXXXXXXX although not present in InputOutputDescription as a property
     public static void invalidateEntries(InputOutputDescription inputOutputDescription, NetworkDescription networkDescription) {
         
         Path path = Paths.get(System.getProperty("installdir") + File.separator + "neural" + File.separator + "egDescription.txt")  ;

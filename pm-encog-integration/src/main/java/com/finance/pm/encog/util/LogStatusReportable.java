@@ -46,7 +46,7 @@ public class LogStatusReportable implements StatusReportable, Closeable {
     }
 	
 	public void sizes(int totalInputRows, int trainingSize, int validationSize) {
-		print("Training input size (nb rows) : " + totalInputRows+ ", inc. : training folds : "+trainingSize+ " and validation fold "+validationSize);
+		print("Training input length (nb rows) : " + totalInputRows+ ", inc. : training folds : "+trainingSize+ " and validation fold "+validationSize);
 		
 	}
     
