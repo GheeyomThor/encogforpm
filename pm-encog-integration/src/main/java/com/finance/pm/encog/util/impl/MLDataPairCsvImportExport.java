@@ -28,7 +28,7 @@ public class MLDataPairCsvImportExport implements CsvImportExport<Integer> {
     public void exportData(Optional<InputOutputDescription> iODescr, Optional<NetworkDescription> netDescr, String exportFileNameExt, Map<Integer, double[]> map) {
 
         //runStamp+"_"+exportFileNameExt
-        String pathname = egFileReferenceManager.encogFileNameGenerator(iODescr, netDescr)[0]+"_"+exportFileNameExt;
+        String pathname = EGFileReferenceManager.findEntry(iODescr.get(), netDescr.get())[0]+"_"+exportFileNameExt;
         File exportFile = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + pathname+".csv");
 
         try (FileWriter fileWriter = new FileWriter(exportFile);

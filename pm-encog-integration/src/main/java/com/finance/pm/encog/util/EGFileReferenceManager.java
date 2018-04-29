@@ -20,109 +20,126 @@ import com.finance.pm.encog.application.NetworkDescription;
 
 public class EGFileReferenceManager {
 
-    private static Logger LOGGER = Logger.getLogger(EGFileReferenceManager.class.getName());
+	private static Logger LOGGER = Logger.getLogger(EGFileReferenceManager.class.getName());
 
-    private static final String sep= " is defined by ";
+	static String PATHNAME = System.getProperty("installdir") + File.separator + "neural" + File.separator + "egDescription.txt";
+	private static final String sep = " is defined by ";
 
-    public synchronized String[] encogFileNameGenerator(
-            Optional<InputOutputDescription> inputOutputDescription,
-            Optional<NetworkDescription> networkDescription) {
+	/**
+	 * Will try and find an existing match to return or create, inserts and returns a new one if no match is found.
+	 * It will always return the last match found.
+	 * XXXXXX matches any char.
+	 * @param inputOutputDescription
+	 * @param networkDescription
+	 * @return
+	 */
+	public synchronized String[] encogFileNameReGenerator(
+			Optional<InputOutputDescription> inputOutputDescription,
+			Optional<NetworkDescription> networkDescription) {
 
-        if (!inputOutputDescription.isPresent() && !networkDescription.isPresent()) {
-            return new String[] {CsvImportExport.runStamp.toString(), "NaN"};
-        }
+		if (!inputOutputDescription.isPresent() && !networkDescription.isPresent()) {
+			return new String[] {CsvImportExport.runStamp.toString(), "NaN"};
+		}
 
-        if(inputOutputDescription.isPresent() && networkDescription.isPresent()) {
+		if(inputOutputDescription.isPresent() && networkDescription.isPresent()) {
 
-            String[] foundEntry = findEntry(inputOutputDescription.get(), networkDescription.get());
-            if (foundEntry != null) return foundEntry;
+			String[] foundEntry = findEntry(inputOutputDescription.get(), networkDescription.get());
+			
+			if (foundEntry != null) {//Existing line
+				return foundEntry;
+			}
 
-            //New line
-            String fileDescr = networkDescription.get().toString() + " " + inputOutputDescription.get().toString();
-            LOGGER.info("No entry was found for description "+fileDescr+".");
-            UUID appRunUUID = CsvImportExport.runStamp;
-            UUID fileUUID = UUID.randomUUID();
-            String newFileName = appRunUUID+"_"+ fileUUID;
-            String newEntry = newFileName+ sep + fileDescr;
-            String[] entryDescr = new String[] {newFileName , newEntry};
-            this.updateEncogFileNameDescriptions(entryDescr);
-            return entryDescr;
-        }
+			//New line
+			String fileDescr = networkDescription.get().toString() + " " + inputOutputDescription.get().toString();
+			if (fileDescr.contains("X")) throw new RuntimeException("Can't insert pattern description into egDescription.txt : "+fileDescr);
 
-        throw new RuntimeException("Inconsistent call");
+			LOGGER.info("No entry was found for description (creating) "+fileDescr+".");
+			UUID appRunUUID = CsvImportExport.runStamp;
+			UUID fileUUID = UUID.randomUUID();
+			String newFileName = appRunUUID+"_"+ fileUUID;
+			String newEntry = newFileName+ sep + fileDescr;
+			String[] entryDescr = new String[] {newFileName , newEntry};
+			this.updateEncogFileNameDescriptions(entryDescr);
+			return entryDescr;
+		}
 
-    }
+		throw new RuntimeException("Inconsistent call. Should not be here.");
 
-    public static String[] findEntry(InputOutputDescription inputOutputDescription, NetworkDescription networkDescription) {
+	}
 
-        String[] foundEntry = null;
+	public static String[] findEntry(InputOutputDescription inputOutputDescription, NetworkDescription networkDescription) {
 
-        //Check existing(and return latest)
-        String fileDescr = networkDescription.toString() + " " + inputOutputDescription.toString();
-        File egDescription = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + "egDescription.txt");
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(egDescription))) {
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] split = line.split(sep);
-                if (split.length != 2) throw new RuntimeException("Invalid entry in Encog description file : "+line);
+		String[] foundEntry = null;
 
-                //Compare side by side
-                Boolean sameLine = true;
-                String lineFileDescr = split[1];
-                if (lineFileDescr.length() != fileDescr.length()) continue;
-                for (int i = 0; i < fileDescr.length(); i++) {
-                    if (fileDescr.charAt(i) != 'X' && lineFileDescr.charAt(i) != 'X' && fileDescr.charAt(i) != lineFileDescr.charAt(i)) {
-                        sameLine = false;
-                        break;
-                    }
-                }
-                if (sameLine) {
-                    LOGGER.info("Found already existing description "+split[1]+" matching "+ lineFileDescr+" :\n\t "+split[0]);
-                    foundEntry = new String[] {split[0], line}; 
-                }
-            }
-        } catch (Exception e){
-            throw new RuntimeException(e);
-        }
-        return foundEntry;
-    }
+		//Check existing(and return latest)
+		String fileDescr = networkDescription.toString() + " " + inputOutputDescription.toString();
+		File egDescription = new File(PATHNAME);
+		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(egDescription))) {
+			String line = null;
+			while ((line = bufferedReader.readLine()) != null) {
+				String[] split = line.split(sep);
+				if (split.length != 2) throw new RuntimeException("Invalid entry in Encog description file : "+line);
 
-    void updateEncogFileNameDescriptions(String[] entryDescr) {
+				//Compare side by side
+				Boolean sameLine = true;
+				String lineFileDescr = split[1];
+				if (lineFileDescr.length() != fileDescr.length()) continue;
+				for (int i = 0; i < fileDescr.length(); i++) {
+					if (fileDescr.charAt(i) != 'X' && lineFileDescr.charAt(i) != 'X' && fileDescr.charAt(i) != lineFileDescr.charAt(i)) {
+						sameLine = false;
+						break;
+					}
+				}
+				if (sameLine) {
+					LOGGER.info("Found existing description "+split[1]+" matching "+ lineFileDescr+" :\n\t "+split[0]);
+					foundEntry = new String[] {split[0], line}; 
+				}
+			}
+		} catch (Exception e){
+			throw new RuntimeException(e);
+		}
+		return foundEntry;
+	}
 
-        LOGGER.info("Adding new entry for description "+entryDescr[1]+ " :\n\t " +entryDescr[0]);
-        File egDescription = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + "egDescription.txt");
-        try (BufferedWriter bufferedReader = new BufferedWriter(new FileWriter(egDescription, true))) {
-            bufferedReader.write(entryDescr[1]);
-            bufferedReader.newLine();
-        }  catch (Exception e){
-            throw new RuntimeException(e);
-        }
+	/**
+	 * Write the line as requested without any other check.
+	 * @param entryDescr
+	 */
+	private void updateEncogFileNameDescriptions(String[] entryDescr) {
 
-    }
+		LOGGER.info("Adding new entry for description "+entryDescr[1]+ " :\n\t " +entryDescr[0]);
+		File egDescription = new File(PATHNAME);
+		try (BufferedWriter bufferedReader = new BufferedWriter(new FileWriter(egDescription, true))) {
+			bufferedReader.write(entryDescr[1]);
+			bufferedReader.newLine();
+		}  catch (Exception e){
+			throw new RuntimeException(e);
+		}
 
-    /** 
-     * XXX: This will only take in account XXXXXXXX substitution mask for the training end date (as the mask may be applied else where as well?)
-     * It should be called with XXXXXXXX date mask to invalidate all entries matching.
-     * @param inputOutputDescription
-     * @param networkDescription
-     */
-    //FIXME skip already dirty lines (using & at ending of "(.*)]]" ??)
-    //FIXME this implies the last discriminator is also the training date or a date mask XXXXXXXX although not present in InputOutputDescription as a property
-    public static void invalidateEntries(InputOutputDescription inputOutputDescription, NetworkDescription networkDescription) {
-        
-        Path path = Paths.get(System.getProperty("installdir") + File.separator + "neural" + File.separator + "egDescription.txt")  ;
-        try {
-            String content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-            String fileDescrRegExp = (networkDescription.toString() + " " + inputOutputDescription.toString()).replaceAll("X+\\]\\]", "(.*)]]");
-            fileDescrRegExp = fileDescrRegExp.replaceAll("\\[", "\\\\[").replaceAll("\\]", "\\\\]");
-            String endDescr = inputOutputDescription.toString().replaceAll("X+\\]\\]", "\\$1]]");
-            String fileDescrDirtySubstitution = networkDescription.toString() + " " + endDescr+ " YDirtyY";
-            content = content.replaceAll(fileDescrRegExp, fileDescrDirtySubstitution);
-            Files.write(path, content.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        
-    }
+	}
+
+	/** 
+	 * XXX: This will only take in account ONE XXXXXXXX substitution mask (Only one mask is allowed at a time)
+	 * It should be called with XXXXXXXX date mask to invalidate all entries matching.
+	 * //TODO count the number of masks and create the endDescrSubstitution accordingly.
+	 * @param inputOutputDescription
+	 * @param networkDescription
+	 */
+	public static void invalidateEntries(InputOutputDescription inputOutputDescription, NetworkDescription networkDescription) {
+
+		Path path = Paths.get(PATHNAME);
+		try {
+			String content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+			String fileDescrRegExp = (networkDescription.toString() + " " + inputOutputDescription.toString()).replaceAll("X+", "(.*)") + "\\n";
+			fileDescrRegExp = fileDescrRegExp.replaceAll("\\[", "\\\\[").replaceAll("\\]", "\\\\]");
+			String endDescrSubstitution = inputOutputDescription.toString().replaceAll("X+", "\\$1");
+			String fileDescrDirtySubstitution = networkDescription.toString() + " " + endDescrSubstitution+ " YDirtyY\n";
+			content = content.replaceAll(fileDescrRegExp, fileDescrDirtySubstitution);
+			Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
 
 }

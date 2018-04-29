@@ -49,7 +49,7 @@ public class EncogService {
 	private NnPredictor oneFoldPredictor;
 	private NnPredictor crossValidationPredictor;
 
-	private EGFileReferenceManager egFileReferenceManager;
+	//private EGFileReferenceManager egFileReferenceManager;
 	private CsvImportExport<Integer> normalizedExporter;
 
 	@Inject
@@ -76,7 +76,7 @@ public class EncogService {
 		this.crossValidationTrainer = crossValidationTrainer;
 		this.crossValidationPredictor = crossValidationPredictor;
 
-		this.egFileReferenceManager = egFileReferenceManager;
+		//this.egFileReferenceManager = egFileReferenceManager;
 		this.normalizedExporter = normalizedExporter;
 
 	}
@@ -163,20 +163,17 @@ public class EncogService {
 	}
 
 
-	public List<double[]> trainForNewOnlyAndcompute(InputOutputDescription iODescription, NetworkDescription networkDescription) throws Exception {
+	public List<double[]> trainForNewOnlyAndcompute(InputOutputDescription iODescription, NetworkDescription networkDescription, String resultsBaseFileName) throws Exception {
 
 		List<double[]> prediction;
 
-		String[] egFileDescr = egFileReferenceManager.encogFileNameGenerator(Optional.of(iODescription), Optional.of(networkDescription));
-		LOGGER.info("Encog file description : "+egFileDescr[1]);
-		LOGGER.info("Encog file to be used : "+egFileDescr[0]);
-		String egPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + egFileDescr[0]+".EG";
+		String egPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + resultsBaseFileName+".EG";
 		File trainedEg = new File(egPath);
 		if (trainedEg.exists()) {
 
 			LOGGER.info("File "+trainedEg.getAbsolutePath()+" was found on the file system : re using");
 
-			String normPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + egFileDescr[0]+".Norm";
+			String normPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + resultsBaseFileName+".Norm";
 			try (FileInputStream fis = new FileInputStream(normPath); ObjectInputStream objectInputStream = new ObjectInputStream(fis)) {
 
 				NormalizationHelper normHelper = (NormalizationHelper) objectInputStream.readObject();
@@ -191,11 +188,11 @@ public class EncogService {
 		} else {
 
 			LOGGER.info("File "+trainedEg.getAbsolutePath()+" was NOT found on the file system : retraining");
-			prediction = crossValidationAndCompute(iODescription, networkDescription, egFileDescr[0]);
+			prediction = crossValidationAndCompute(iODescription, networkDescription, resultsBaseFileName);
 
 		}
 
-		LOGGER.info("Encog "+egFileDescr[0]+". Prediction computation done.");
+		LOGGER.info("Encog "+resultsBaseFileName+". Prediction computation done.");
 		try {
 			Encog.getInstance().shutdown();
 		} catch (Exception e) {

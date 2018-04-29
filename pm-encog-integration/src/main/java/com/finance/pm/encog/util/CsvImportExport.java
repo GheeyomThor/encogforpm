@@ -10,13 +10,13 @@ import com.finance.pm.encog.application.InputOutputDescription;
 import com.finance.pm.encog.application.NetworkDescription;
 
 public interface CsvImportExport<T> {
-    
-    UUID runStamp = UUID.randomUUID();
 
-    void exportData(Optional<InputOutputDescription> iODescr, Optional<NetworkDescription> netDescr, String exportFileNameExt, Map<T, double[]> map);
+	UUID runStamp = UUID.randomUUID();
 
-    default SortedMap<T, double[]> importData(File exportFile) {
-        throw new UnsupportedOperationException();
-    }
+	void exportData(Optional<InputOutputDescription> iODescr, Optional<NetworkDescription> netDescr, String exportFileNameExt, Map<T, double[]> map);
+
+	default SortedMap<T, double[]> importData(File exportFile) {
+		throw new UnsupportedOperationException();
+	}
 
 }
