@@ -26,14 +26,14 @@ public class EGFileReferenceManager {
 	private static final String sep = " is defined by ";
 
 	/**
-	 * Will try and find an existing match to return or create, inserts and returns a new one if no match is found.
+	 * Will try and find an existing match or create a new one if no match is found.
 	 * It will always return the last match found.
 	 * XXXXXX matches any char.
 	 * @param inputOutputDescription
 	 * @param networkDescription
 	 * @return
 	 */
-	public synchronized String[] encogFileNameReGenerator(
+	public synchronized String[] generateFileName(
 			Optional<InputOutputDescription> inputOutputDescription,
 			Optional<NetworkDescription> networkDescription) {
 
@@ -44,22 +44,20 @@ public class EGFileReferenceManager {
 		if(inputOutputDescription.isPresent() && networkDescription.isPresent()) {
 
 			String[] foundEntry = findEntry(inputOutputDescription.get(), networkDescription.get());
-			
+
 			if (foundEntry != null) {//Existing line
 				return foundEntry;
 			}
 
 			//New line
 			String fileDescr = networkDescription.get().toString() + " " + inputOutputDescription.get().toString();
-			if (fileDescr.contains("X")) throw new RuntimeException("Can't insert pattern description into egDescription.txt : "+fileDescr);
+			if (fileDescr.contains("X")) throw new RuntimeException("Can't generate file name from pattern description : "+fileDescr);
 
-			LOGGER.info("No entry was found for description (creating) "+fileDescr+".");
+			LOGGER.info("No entry was found for description (generating) "+fileDescr+".");
 			UUID appRunUUID = CsvImportExport.runStamp;
 			UUID fileUUID = UUID.randomUUID();
 			String newFileName = appRunUUID+"_"+ fileUUID;
-			String newEntry = newFileName+ sep + fileDescr;
-			String[] entryDescr = new String[] {newFileName , newEntry};
-			this.updateEncogFileNameDescriptions(entryDescr);
+			String[] entryDescr = new String[] {newFileName , fileDescr};
 			return entryDescr;
 		}
 
@@ -67,12 +65,21 @@ public class EGFileReferenceManager {
 
 	}
 
+	/**
+	 * Check existing entry (and return the last line found)
+	 * @param inputOutputDescription
+	 * @param networkDescription
+	 * @return
+	 */
 	public static String[] findEntry(InputOutputDescription inputOutputDescription, NetworkDescription networkDescription) {
+		String fileDescr = networkDescription.toString() + " " + inputOutputDescription.toString();
+		String[] foundEntry = findEntry(fileDescr);
+		return foundEntry;
+	}
+
+	private static String[] findEntry(String fileDescr) {
 
 		String[] foundEntry = null;
-
-		//Check existing(and return latest)
-		String fileDescr = networkDescription.toString() + " " + inputOutputDescription.toString();
 		File egDescription = new File(PATHNAME);
 		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(egDescription))) {
 			String line = null;
@@ -91,13 +98,14 @@ public class EGFileReferenceManager {
 					}
 				}
 				if (sameLine) {
-					LOGGER.info("Found existing description "+split[1]+" matching "+ lineFileDescr+" :\n\t "+split[0]);
-					foundEntry = new String[] {split[0], line}; 
+					LOGGER.info("Found existing description "+split[1]+" matching "+ fileDescr+" :\n\t "+split[0]);
+					foundEntry = new String[] {split[0], split[1]}; 
 				}
 			}
 		} catch (Exception e){
 			throw new RuntimeException(e);
 		}
+
 		return foundEntry;
 	}
 
@@ -105,12 +113,20 @@ public class EGFileReferenceManager {
 	 * Write the line as requested without any other check.
 	 * @param entryDescr
 	 */
-	private void updateEncogFileNameDescriptions(String[] entryDescr) {
+	public void insertEncogFileNameDescriptions(String[] entryDescr) {
 
-		LOGGER.info("Adding new entry for description "+entryDescr[1]+ " :\n\t " +entryDescr[0]);
+		String[] foundEntry = findEntry(entryDescr[1]);
+
+		if (foundEntry != null) {//A line exists with the same description
+			LOGGER.warn("Trying to insert an existing line. " + entryDescr + " matches " + foundEntry);
+			if (foundEntry[0].equals(entryDescr[0])) throw new RuntimeException("Duplicate entries : existing "+foundEntry+" cannot be overriden with "+entryDescr);
+		}
+
+		String newEntry = entryDescr[0]+ sep + entryDescr[1];
+		LOGGER.info("Adding new entry for description "+newEntry);
 		File egDescription = new File(PATHNAME);
 		try (BufferedWriter bufferedReader = new BufferedWriter(new FileWriter(egDescription, true))) {
-			bufferedReader.write(entryDescr[1]);
+			bufferedReader.write(newEntry);
 			bufferedReader.newLine();
 		}  catch (Exception e){
 			throw new RuntimeException(e);

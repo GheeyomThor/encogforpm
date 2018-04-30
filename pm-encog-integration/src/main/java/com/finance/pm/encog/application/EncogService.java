@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -27,7 +26,6 @@ import com.finance.pm.encog.guice.Temporal;
 import com.finance.pm.encog.guice.Training;
 import com.finance.pm.encog.guice.Validation;
 import com.finance.pm.encog.util.CsvImportExport;
-import com.finance.pm.encog.util.EGFileReferenceManager;
 import com.google.inject.name.Named;
 
 /**
@@ -49,7 +47,6 @@ public class EncogService {
 	private NnPredictor oneFoldPredictor;
 	private NnPredictor crossValidationPredictor;
 
-	//private EGFileReferenceManager egFileReferenceManager;
 	private CsvImportExport<Integer> normalizedExporter;
 
 	@Inject
@@ -63,7 +60,7 @@ public class EncogService {
 			@Named("versatile") NnTrainer crossValidationTrainer,
 			@Validation NnPredictor crossValidationPredictor,
 
-			EGFileReferenceManager egFileReferenceManager, CsvImportExport<Integer> normalizedExporter) {
+			CsvImportExport<Integer> normalizedExporter) {
 
 		super();
 		this.ofNetworkFactory = networkFactory;
@@ -76,7 +73,6 @@ public class EncogService {
 		this.crossValidationTrainer = crossValidationTrainer;
 		this.crossValidationPredictor = crossValidationPredictor;
 
-		//this.egFileReferenceManager = egFileReferenceManager;
 		this.normalizedExporter = normalizedExporter;
 
 	}
@@ -142,13 +138,13 @@ public class EncogService {
 		LOGGER.info("Encog "+resultsBaseFileName+". Cross Validation Training done.");
 		Encog.getInstance().shutdown();
 
-		if (LOGGER.isDebugEnabled()) exportNormalysed(trainingSet, iODescr, netDescr);
+		if (LOGGER.isDebugEnabled()) exportNormalysed(trainingSet, resultsBaseFileName);
 
 		return prediction;
 
 	}
 
-	private void exportNormalysed(MLDataSet data, InputOutputDescription iODescr, NetworkDescription netDescr ) {
+	private void exportNormalysed(MLDataSet data, String baseFileName) {
 
 		LinkedHashMap<Integer, double[]> analysedInputs = new LinkedHashMap<>();
 		LinkedHashMap<Integer, double[]> analysedOutputs = new LinkedHashMap<>();
@@ -157,8 +153,8 @@ public class EncogService {
 			analysedInputs.put(i++, pair.getInputArray());
 			analysedOutputs.put(i, pair.getIdealArray());
 		}
-		normalizedExporter.exportData(Optional.of(iODescr), Optional.of(netDescr), "trainingInputs_EncogNormalised", analysedInputs);
-		normalizedExporter.exportData(Optional.of(iODescr), Optional.of(netDescr), "trainingOutputs_EncogNormalised", analysedOutputs);
+		normalizedExporter.exportData(baseFileName, "trainingInputs_EncogNormalised", analysedInputs);
+		normalizedExporter.exportData(baseFileName, "trainingOutputs_EncogNormalised", analysedOutputs);
 
 	}
 

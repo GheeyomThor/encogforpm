@@ -12,7 +12,6 @@ import com.finance.pm.encog.application.training.NnTrainer;
 import com.finance.pm.encog.application.training.impl.CrossValidationTrainer;
 import com.finance.pm.encog.application.training.impl.PropagationTrainer;
 import com.finance.pm.encog.util.CsvImportExport;
-import com.finance.pm.encog.util.EGFileReferenceManager;
 import com.finance.pm.encog.util.impl.MLDataPairCsvImportExport;
 import com.finance.pm.encog.util.impl.MapCsvImportExport;
 import com.google.inject.AbstractModule;
@@ -30,9 +29,6 @@ public class EncogServiceModule extends AbstractModule {
         //CSV Import export
         bind(new TypeLiteral<CsvImportExport<Integer>>() {}).to(MLDataPairCsvImportExport.class);
         bind(new TypeLiteral<CsvImportExport<Date>>() {}).to(MapCsvImportExport.class);
-        
-        //Eg files
-        bind(EGFileReferenceManager.class);
 
         //One fold POC with temporal data set
         bind(PropagationFactory.class).to(ResilientPropagationFactory.class);

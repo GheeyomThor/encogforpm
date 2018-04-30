@@ -12,32 +12,23 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.inject.Inject;
-
 import org.apache.log4j.Logger;
 
-import com.finance.pm.encog.application.InputOutputDescription;
-import com.finance.pm.encog.application.NetworkDescription;
 import com.finance.pm.encog.util.CsvImportExport;
-import com.finance.pm.encog.util.EGFileReferenceManager;
 import com.google.common.primitives.Doubles;
 
 public class MapCsvImportExport implements CsvImportExport<Date> {
     
     private static Logger LOGGER = Logger.getLogger(MapCsvImportExport.class.getName());
-    
-    @Inject
-    EGFileReferenceManager egFileReferenceManager;
 
     @Override
-    public void exportData(Optional<InputOutputDescription> iODescr, Optional<NetworkDescription> netDescr, String exportFileNameExt, Map<Date, double[]> map) {
+    public void exportData(String baseFileName, String exportFileNameExt, Map<Date, double[]> map) {
         
         //runStamp+"_"+exportFileNameExt
-        String pathname = EGFileReferenceManager.findEntry(iODescr.get(), netDescr.get())[0]+"_"+exportFileNameExt;
+        String pathname = baseFileName+"_"+exportFileNameExt;
         File exportFile = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + pathname + ".csv");
 
         try (FileWriter fileWriter = new FileWriter(exportFile);

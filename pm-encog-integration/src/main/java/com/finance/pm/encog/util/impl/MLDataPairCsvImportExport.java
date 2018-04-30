@@ -6,29 +6,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
-
-import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
 
-import com.finance.pm.encog.application.InputOutputDescription;
-import com.finance.pm.encog.application.NetworkDescription;
 import com.finance.pm.encog.util.CsvImportExport;
-import com.finance.pm.encog.util.EGFileReferenceManager;
 
 public class MLDataPairCsvImportExport implements CsvImportExport<Integer> {
 
     private static Logger LOGGER = Logger.getLogger(MLDataPairCsvImportExport.class);
 
-    @Inject
-    EGFileReferenceManager egFileReferenceManager;
-
     @Override
-    public void exportData(Optional<InputOutputDescription> iODescr, Optional<NetworkDescription> netDescr, String exportFileNameExt, Map<Integer, double[]> map) {
+    public void exportData(String baseFileName, String exportFileNameExt, Map<Integer, double[]> map) {
 
         //runStamp+"_"+exportFileNameExt
-        String pathname = EGFileReferenceManager.findEntry(iODescr.get(), netDescr.get())[0]+"_"+exportFileNameExt;
+        String pathname = baseFileName+"_"+exportFileNameExt;
         File exportFile = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + pathname+".csv");
 
         try (FileWriter fileWriter = new FileWriter(exportFile);
