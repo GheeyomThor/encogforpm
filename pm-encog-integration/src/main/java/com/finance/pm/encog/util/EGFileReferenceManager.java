@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,7 +34,7 @@ public class EGFileReferenceManager {
 	 * @param networkDescription
 	 * @return
 	 */
-	public synchronized String[] generateFileName(
+	public static String[] generateFileName(
 			Optional<InputOutputDescription> inputOutputDescription,
 			Optional<NetworkDescription> networkDescription) {
 
@@ -115,21 +116,30 @@ public class EGFileReferenceManager {
 	 */
 	public void insertEncogFileNameDescriptions(String[] entryDescr) {
 
-		String[] foundEntry = findEntry(entryDescr[1]);
+		synchronized(EGFileReferenceManager.class) {//We synchronize on class because of other static methods accesses to the file
 
-		if (foundEntry != null) {//A line exists with the same description
-			LOGGER.warn("Trying to insert an existing line. " + entryDescr + " matches " + foundEntry);
-			if (foundEntry[0].equals(entryDescr[0])) throw new RuntimeException("Duplicate entries : existing "+foundEntry+" cannot be overriden with "+entryDescr);
-		}
+			String[] foundEntry = findEntry(entryDescr[1]);
 
-		String newEntry = entryDescr[0]+ sep + entryDescr[1];
-		LOGGER.info("Adding new entry for description "+newEntry);
-		File egDescription = new File(PATHNAME);
-		try (BufferedWriter bufferedReader = new BufferedWriter(new FileWriter(egDescription, true))) {
-			bufferedReader.write(newEntry);
-			bufferedReader.newLine();
-		}  catch (Exception e){
-			throw new RuntimeException(e);
+			if (foundEntry != null) {//A line exists with the same description
+				LOGGER.info("Trying to insert an existing description. " + entryDescr[1] + " matches " + foundEntry[1]);
+				if (foundEntry[0].equals(entryDescr[0])) {
+					LOGGER.info("Same eg file reused : "+ Arrays.toString(entryDescr) + " and " + Arrays.toString(foundEntry));
+					return;
+				} else {
+					LOGGER.warn("New eg file for the same description : "+ Arrays.toString(entryDescr) + " and " + Arrays.toString(foundEntry));
+				}
+			}
+
+			String newEntry = entryDescr[0]+ sep + entryDescr[1];
+			LOGGER.info("Inserting new entry for description " + newEntry);
+			File egDescription = new File(PATHNAME);
+			try (BufferedWriter bufferedReader = new BufferedWriter(new FileWriter(egDescription, true))) {
+				bufferedReader.write(newEntry);
+				bufferedReader.newLine();
+			}  catch (Exception e){
+				throw new RuntimeException(e);
+			}
+
 		}
 
 	}
@@ -141,12 +151,13 @@ public class EGFileReferenceManager {
 	 * @param inputOutputDescription
 	 * @param networkDescription
 	 */
-	public static void invalidateEntries(InputOutputDescription inputOutputDescription, NetworkDescription networkDescription) {
+	public synchronized static void invalidateEntries(InputOutputDescription inputOutputDescription, NetworkDescription networkDescription) {
 
 		Path path = Paths.get(PATHNAME);
 		try {
 			String content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 			String fileDescrRegExp = (networkDescription.toString() + " " + inputOutputDescription.toString()).replaceAll("X+", "(.*)") + "\\n";
+			LOGGER.info("Invalidating :" + fileDescrRegExp);
 			fileDescrRegExp = fileDescrRegExp.replaceAll("\\[", "\\\\[").replaceAll("\\]", "\\\\]");
 			String endDescrSubstitution = inputOutputDescription.toString().replaceAll("X+", "\\$1");
 			String fileDescrDirtySubstitution = networkDescription.toString() + " " + endDescrSubstitution+ " YDirtyY\n";
