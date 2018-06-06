@@ -26,7 +26,7 @@ public class TrainingSpecificationBuilder {
         return this;
     }
 
-    public TrainingSpecificationBuilder witTrainingArgs(String trainingArgs) {
+    public TrainingSpecificationBuilder withTrainingArgs(String trainingArgs) {
         this.trainingArgs = trainingArgs;
         return this;
     }

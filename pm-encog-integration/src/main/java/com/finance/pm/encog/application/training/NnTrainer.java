@@ -11,10 +11,6 @@ import org.encog.ml.train.MLTrain;
  */
 public interface NnTrainer {
 
-    default File train(MLTrain mlTrain, MLDataSet trainingSet, String resultBaseFileName) {
-        return train(mlTrain, trainingSet, null, null, null, null, resultBaseFileName);
-    };
-
     File train(MLTrain mlTrain, MLDataSet trainingSet,
                 String typeFeedforward, String modelArchitecture, String trainingType, String trainingArgs,
                 String resultBaseFileName);

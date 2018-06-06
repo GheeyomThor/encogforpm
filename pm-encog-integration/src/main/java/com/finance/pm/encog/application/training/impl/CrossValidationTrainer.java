@@ -48,7 +48,7 @@ public class CrossValidationTrainer implements NnTrainer {
 
             TrainingSpecificationBuilder methodSpecificationBuilder = new TrainingSpecificationBuilder()
                     .withMethod((methodType)).withArchitecture(modelArchitecture)
-                    .withTrainingType(trainingType).witTrainingArgs(trainingArgs);
+                    .withTrainingType(trainingType).withTrainingArgs(trainingArgs);
 
             TrainingSpecification trainingSpec = methodSpecificationBuilder.build(dataSet);
 

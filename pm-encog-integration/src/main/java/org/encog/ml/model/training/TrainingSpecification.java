@@ -14,7 +14,7 @@ public class TrainingSpecification {
         super();
         this.methodSpecification = methodSpecification;
         this.trainingType = trainingType;
-        this.trainingArgs = trainingArgs;
+		this.trainingArgs = trainingArgs;
     }
     
 

@@ -107,7 +107,7 @@ public class EncogService {
 					.build();
 
 			LOGGER.info("Training network");
-			File trainedEg = oneFoldTrainer.train(mlTrain, trainingSet, resultsBaseFileName);
+			File trainedEg = oneFoldTrainer.train(mlTrain, trainingSet, null, null, null, networkDescription.getTrainingArgs(), resultsBaseFileName);
 
 			LOGGER.info("Running predictions");
 			List<double[]> prediction = oneFoldPredictor.compute(trainedEg, trainingSet);

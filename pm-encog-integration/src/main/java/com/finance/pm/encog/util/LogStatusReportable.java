@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 import org.encog.StatusReportable;
-import org.encog.ml.MLRegression;
+import org.encog.ml.MLMethod;
 
 public class LogStatusReportable implements StatusReportable, Closeable {
     
@@ -37,7 +37,7 @@ public class LogStatusReportable implements StatusReportable, Closeable {
         print("Validation error : " + validationRegressionError);
     }
 
-    public void finalModel(MLRegression bestMethod) {
+    public void finalModel(MLMethod bestMethod) {
         print("Final model: " + bestMethod);
     }
 

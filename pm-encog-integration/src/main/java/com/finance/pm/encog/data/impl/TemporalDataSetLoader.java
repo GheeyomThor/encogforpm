@@ -51,6 +51,7 @@ public class TemporalDataSetLoader implements DataSetLoader {
 		});
 
 		// One output description for the ideal
+		if (leadWindowSize > 1) throw new UnsupportedOperationException("Lead size > 1 is not supported. Please fix.");
 		TemporalDataDescription desc = new TemporalDataDescription(TemporalDataDescription.Type.RAW, false, true);
 		temporalMLDataSet.addDescription(desc);
 
@@ -76,7 +77,7 @@ public class TemporalDataSetLoader implements DataSetLoader {
 
 			// ideals
 			// At this stage we only are interested by one value for the output
-			if (dateIndex < tIdealsMaxLength) point.setData(inputData.length, trainingIdealValues.get(dateIndex)[0]);
+			if (lagWindowSize < dateIndex && dateIndex < tIdealsMaxLength) point.setData(inputData.length, trainingIdealValues.get(dateIndex)[0]);
 
 			temporalMLDataSet.getPoints().add(point);
 
