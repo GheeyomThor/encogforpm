@@ -78,10 +78,10 @@ public class MapCsvImportExport implements CsvImportExport<Date> {
                     
                     //entry creation
                     double[] array = Arrays.asList(rowSplit).subList(1, rowSplit.length)
-                                            .stream().mapToDouble(x -> Double.valueOf(x)).toArray();
+                                            .stream().mapToDouble(x -> (x.isEmpty())?Double.NaN:Double.valueOf(x)).toArray();
                     map.put(dateFormatter.parse(rowSplit[0]), array);
                 } catch (Exception e) {
-                    LOGGER.warn("Unreadable line in "+exportFile.getAbsolutePath()+" : "+line);
+                    LOGGER.warn("Unreadable line in "+exportFile.getAbsolutePath()+" : "+line + ". Cause: " + e);
                 }
             }
 

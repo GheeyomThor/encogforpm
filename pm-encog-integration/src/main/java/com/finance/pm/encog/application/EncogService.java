@@ -120,7 +120,7 @@ public class EncogService {
 
 	}
 
-	public List<double[]> crossValidationAndCompute(
+	public List<double[]> crossTrainAndCompute(
 			InputOutputDescription iODescr, NetworkDescription netDescr,
 			String resultsBaseFileName) throws Exception {
 
@@ -163,7 +163,7 @@ public class EncogService {
 	}
 
 
-	public List<double[]> trainForNewOnlyAndcompute(InputOutputDescription iODescription, NetworkDescription networkDescription, String resultsBaseFileName) throws Exception {
+	public List<double[]> optionalCrossTrainAndCompute(InputOutputDescription iODescription, NetworkDescription networkDescription, String resultsBaseFileName) throws Exception {
 
 		synchronized(EncogService.class) {
 			List<double[]> prediction;
@@ -189,7 +189,7 @@ public class EncogService {
 			} else {
 
 				LOGGER.info("File "+trainedEg.getAbsolutePath()+" was NOT found on the file system : retraining");
-				prediction = crossValidationAndCompute(iODescription, networkDescription, resultsBaseFileName);
+				prediction = crossTrainAndCompute(iODescription, networkDescription, resultsBaseFileName);
 
 			}
 
