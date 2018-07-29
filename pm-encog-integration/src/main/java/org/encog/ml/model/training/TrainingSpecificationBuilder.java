@@ -1,6 +1,6 @@
 package org.encog.ml.model.training;
 
-import org.encog.ml.data.versatile.VersatileMLDataSet;
+import org.encog.ml.data.MLDataSet;
 import org.encog.ml.model.method.MethodSpecification;
 import org.encog.ml.model.method.MethodSpecificationBuilder;
 
@@ -32,7 +32,7 @@ public class TrainingSpecificationBuilder {
     }
 
 
-    public TrainingSpecification build(VersatileMLDataSet dataSet) {
+    public TrainingSpecification build(MLDataSet dataSet) {
         
         if (methodType == null) {
             throw new RuntimeException("Please either specify either a method type or a method type and an architecture");

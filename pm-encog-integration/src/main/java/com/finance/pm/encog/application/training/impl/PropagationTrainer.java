@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.encog.ml.data.MLDataSet;
+import org.encog.ml.model.config.FeedforwardConfig;
+import org.encog.ml.model.training.TrainingSpecification;
+import org.encog.ml.model.training.TrainingSpecificationBuilder;
 import org.encog.ml.train.MLTrain;
 import org.encog.persist.EncogDirectoryPersistence;
 
@@ -26,9 +29,9 @@ public class PropagationTrainer implements NnTrainer {
 
 	@Override
 	public File train(MLTrain mlTrain, MLDataSet trainingSet,
-			String typeFeedforward, String modelArchitecture, String trainingType, String trainingArgs,
+			String modelMethod, String modelArchitecture, String trainingType, String trainingArgs,
 			String resultBaseFileName) {
-		
+
 		Map<String, String> trainingArgsMap = parseTrainingArgs(trainingArgs);
 
 		try (LogStatusReportable report = new LogStatusReportable(resultBaseFileName)) {
@@ -43,7 +46,7 @@ public class PropagationTrainer implements NnTrainer {
 			} while (mlTrain.getError() > THRESHOLD && epoch < maxIterations);
 
 			report.finalModel(mlTrain.getMethod());
-			report.print("Training input length (nb rows) : "+trainingSet.size());
+			report.print("Training input length (nb rows) : " + trainingSet.size());
 
 			File file = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + resultBaseFileName + ".EG");
 			EncogDirectoryPersistence.saveObject(file, mlTrain.getMethod());

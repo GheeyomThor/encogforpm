@@ -14,6 +14,8 @@ import org.encog.ml.data.MLDataPair;
 import org.encog.ml.data.MLDataSet;
 import org.encog.ml.data.versatile.NormalizationHelper;
 import org.encog.ml.data.versatile.VersatileMLDataSet;
+import org.encog.ml.model.training.TrainingSpecification;
+import org.encog.ml.model.training.TrainingSpecificationBuilder;
 import org.encog.ml.train.MLTrain;
 
 import com.finance.pm.encog.application.nnetwork.PropagationTrainingBuilder;
@@ -39,8 +41,6 @@ public class EncogService {
 
 	private DataSetLoader versatileTrainingDataLoader;
 
-	private NnFactory ofNetworkFactory;
-	private PropagationFactory ofPropagationFactory;
 	private NnTrainer oneFoldTrainer;
 	private NnTrainer crossValidationTrainer;
 
@@ -63,8 +63,6 @@ public class EncogService {
 			CsvImportExport<Integer> normalizedExporter) {
 
 		super();
-		this.ofNetworkFactory = networkFactory;
-		this.ofPropagationFactory = propagationFactory;
 		this.oneFoldTemporalDataLoader = oneFoldTemporalDataLoader;
 		this.oneFoldTrainer = oneFoldTrainer;
 		this.oneFoldPredictor = oneFoldPredictor;
@@ -99,15 +97,22 @@ public class EncogService {
 			LOGGER.info("Importing data");
 			MLDataSet trainingSet = oneFoldTemporalDataLoader.loadData(iODescription.getInputType(), iODescription.getOutputType(), iODescription.getLagWindowSize(), iODescription.getLeadWindowSize());
 
-			LOGGER.info("Creating network method and training");
-			//TODO remove guice injection and use MLTrainFactory.create instead to pickup the correct method and propagation
-			MLTrain mlTrain = new PropagationTrainingBuilder()
-					.withMethodFactory(ofNetworkFactory).withArchitecture(networkDescription.getModelArchitecture())
-					.withDataSet(trainingSet).withPropagationFactory(ofPropagationFactory)
-					.build();
+			String egPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + resultsBaseFileName+".EG";
+			File trainedEg = new File(egPath);
 
-			LOGGER.info("Training network");
-			File trainedEg = oneFoldTrainer.train(mlTrain, trainingSet, null, null, null, networkDescription.getTrainingArgs(), resultsBaseFileName);
+			if (trainedEg.exists()) {
+				LOGGER.info("No training requested.");
+			} else {
+				LOGGER.info("Creating network method and training");
+				TrainingSpecificationBuilder trainingSpecificationBuilder = new TrainingSpecificationBuilder()
+						.withMethod((networkDescription.getMethodType())).withArchitecture(networkDescription.getModelArchitecture())
+						.withTrainingType(networkDescription.getTrainingType()).withTrainingArgs(networkDescription.getTrainingArgs());
+				TrainingSpecification trainingSpec = trainingSpecificationBuilder.build(trainingSet);
+				MLTrain mlTrain = new PropagationTrainingBuilder().withDataSet(trainingSet).withTrainingSpecification(trainingSpec).build();
+
+				LOGGER.info("Training network ...");
+				trainedEg = oneFoldTrainer.train(mlTrain, trainingSet, null, null, null, networkDescription.getTrainingArgs(), resultsBaseFileName);
+			}
 
 			LOGGER.info("Running predictions");
 			List<double[]> prediction = oneFoldPredictor.compute(trainedEg, trainingSet);
@@ -172,7 +177,7 @@ public class EncogService {
 			File trainedEg = new File(egPath);
 			if (trainedEg.exists()) {
 
-				LOGGER.info("File "+trainedEg.getAbsolutePath()+" was found on the file system : reusing");
+				LOGGER.info("File " + trainedEg.getAbsolutePath() + " was found on the file system : reusing");
 
 				String normPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + resultsBaseFileName+".Norm";
 				try (FileInputStream fis = new FileInputStream(normPath); ObjectInputStream objectInputStream = new ObjectInputStream(fis)) {

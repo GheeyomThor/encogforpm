@@ -11,8 +11,9 @@ public class LayerDescription {
 
     private Integer neuronsCount;
     private Class<? extends ActivationFunction> activationFunction;
+    private Boolean isBiased;
 
-    public LayerDescription(Integer neuronsCount, Class<? extends ActivationFunction> activationFunction) {
+    public LayerDescription(Class<? extends ActivationFunction> activationFunction, Integer neuronsCount, Boolean isBiased) {
         super();
         this.neuronsCount = neuronsCount;
         this.activationFunction = activationFunction;
@@ -31,5 +32,9 @@ public class LayerDescription {
            throw new RuntimeException("Construction failed for "+activationFunction.getName(), e);
         }
     }
+
+	public Boolean getIsBiased() {
+		return isBiased;
+	}
 
 }
