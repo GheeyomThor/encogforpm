@@ -1,7 +1,11 @@
 package com.finance.pm.encog.application;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class NetworkDescription {
 
@@ -15,6 +19,40 @@ public class NetworkDescription {
 		this.modelArchitecture = modelArchitecture;
 		this.trainingType = trainingType;
 		this.trainingArgs = trainingArgs;
+	}
+
+	public NetworkDescription(String nnTrainingArgs, int inputWidth, int outputWidth, int nnLagWindowSize, int nnLeadWindowSize) {
+
+		Map<String, String> trainingParamsMap = parseTrainingArgs(nnTrainingArgs);
+
+		//Architecture Example
+		//?:B->TANH->4:B->TANH->?
+		//Means :
+		//layer 1. '?:B' 		Activation==default(linear),Count==default(inputWitdh),Bias==true
+		//layer 2. 'TANH->4:B' 	Activation==TANH,Count==4,Bias==true
+		//layer 3. 'TANH->?'	Activation==TANH,Count==default(outputWidth),Bias==false
+		//@see MethodConfig.class for other examples.
+		String rowArchitectureDescrString = trainingParamsMap.get("nnArchitecture"); //"?:B->TANH->"+ (int) hiddenLayerCount +":B->TANH->?";
+		Pattern p = Pattern.compile("f([0-9].[0.9])");
+		Matcher matcher = p.matcher(rowArchitectureDescrString);
+		String nnModelArchitecture = null;
+		while (matcher.find()) {
+			double hiddenLayerFactor = Double.valueOf(matcher.group(1));
+			double hiddenLayerCount = ((double) (inputWidth*nnLagWindowSize + outputWidth*nnLeadWindowSize))*hiddenLayerFactor;
+			if (nnModelArchitecture == null) nnModelArchitecture = rowArchitectureDescrString.substring(0, matcher.start());
+			nnModelArchitecture = nnModelArchitecture + hiddenLayerCount;
+		}
+		modelArchitecture = nnModelArchitecture + rowArchitectureDescrString.substring(matcher.end());
+
+		//	Others
+		methodType = trainingParamsMap.get("nnMethod"); //MLMethodFactory.TYPE_FEEDFORWARD;
+		trainingType = trainingParamsMap.get("nnTrainType"); //@see MLTrainFactory. Defaults to "rprop" ie ResilientPropagation for MLMethodFactory.TYPE_FEEDFORWARD @see MethodConfig
+		trainingArgs = nnTrainingArgs + trainingParamsMap.get("nnTrainArgs"); //see MLTrainFactory. Defaults to ""
+
+	}
+
+	private Map<String, String> parseTrainingArgs(String trainingArgs) {
+		return Arrays.stream(trainingArgs.split(",")).collect(Collectors.toMap(p -> p.split("=")[0].trim(), p -> p.split("=")[1].trim()));
 	}
 
 	public String getMethodType() {
