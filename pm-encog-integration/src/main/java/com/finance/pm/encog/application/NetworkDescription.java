@@ -7,6 +7,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.encog.ml.factory.MLMethodFactory;
+
 public class NetworkDescription {
 
 	private String methodType;
@@ -23,6 +25,7 @@ public class NetworkDescription {
 
 	public NetworkDescription(String nnTrainingArgs, int inputWidth, int outputWidth, int nnLagWindowSize, int nnLeadWindowSize) {
 
+		//ex : maxIterations=300,xxx=yyy,...,nnArchitecture=?:B->TANH->f1.5:B->TANH->?,nnMethod=feedforward,nnTrainType=rprop,INIT_UPDATE=0.1,MAX_STEP=50,...
 		Map<String, String> trainingParamsMap = parseTrainingArgs(nnTrainingArgs);
 
 		//Architecture Example
@@ -32,7 +35,7 @@ public class NetworkDescription {
 		//layer 2. 'TANH->4:B' 	Activation==TANH,Count==4,Bias==true
 		//layer 3. 'TANH->?'	Activation==TANH,Count==default(outputWidth),Bias==false
 		//@see MethodConfig.class for other examples.
-		String rowArchitectureDescrString = trainingParamsMap.get("nnArchitecture"); //"?:B->TANH->"+ (int) hiddenLayerCount +":B->TANH->?";
+		String rowArchitectureDescrString = (trainingParamsMap.containsKey("nnArchitecture"))?trainingParamsMap.get("nnArchitecture"):"?:B->TANH->f1.5:B->TANH->?"; //"?:B->TANH->"+ (int) hiddenLayerCount +":B->TANH->?";
 		Pattern p = Pattern.compile("f([0-9].[0.9])");
 		Matcher matcher = p.matcher(rowArchitectureDescrString);
 		String nnModelArchitecture = null;
@@ -45,9 +48,9 @@ public class NetworkDescription {
 		modelArchitecture = nnModelArchitecture + rowArchitectureDescrString.substring(matcher.end());
 
 		//	Others
-		methodType = trainingParamsMap.get("nnMethod"); //MLMethodFactory.TYPE_FEEDFORWARD;
-		trainingType = trainingParamsMap.get("nnTrainType"); //@see MLTrainFactory. Defaults to "rprop" ie ResilientPropagation for MLMethodFactory.TYPE_FEEDFORWARD @see MethodConfig
-		trainingArgs = nnTrainingArgs + trainingParamsMap.get("nnTrainArgs"); //see MLTrainFactory. Defaults to ""
+		methodType = (trainingParamsMap.containsKey("nnMethod"))?trainingParamsMap.get("nnMethod"):MLMethodFactory.TYPE_FEEDFORWARD; //MLMethodFactory.TYPE_FEEDFORWARD;
+		trainingType = trainingParamsMap.get("nnTrainType"); //can be null //@see MLTrainFactory. Defaults to "rprop" ie ResilientPropagation for MLMethodFactory.TYPE_FEEDFORWARD @see MethodConfig
+		trainingArgs = nnTrainingArgs; //Propagation training args subset is flatMapped into the full set of args //@see MLTrainFactory. Defaults to ""
 
 	}
 

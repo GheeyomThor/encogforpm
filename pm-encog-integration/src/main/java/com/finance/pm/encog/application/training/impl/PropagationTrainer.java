@@ -7,9 +7,6 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.encog.ml.data.MLDataSet;
-import org.encog.ml.model.config.FeedforwardConfig;
-import org.encog.ml.model.training.TrainingSpecification;
-import org.encog.ml.model.training.TrainingSpecificationBuilder;
 import org.encog.ml.train.MLTrain;
 import org.encog.persist.EncogDirectoryPersistence;
 
