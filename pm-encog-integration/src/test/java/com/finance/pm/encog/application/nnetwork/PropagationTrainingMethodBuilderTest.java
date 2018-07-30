@@ -68,9 +68,9 @@ public class PropagationTrainingMethodBuilderTest {
         propMLBuilder.withDataSet(mlDataSet);
         
         LinkedList<LayerDescription> topology = new LinkedList<>();
-        topology.add(new LayerDescription(mlDataSet.getInputSize(), ActivationSigmoid.class));
-        topology.add(new LayerDescription(25, ActivationSigmoid.class));
-        topology.add(new LayerDescription(mlDataSet.getIdealSize(), ActivationSigmoid.class));
+        topology.add(new LayerDescription(ActivationSigmoid.class, mlDataSet.getInputSize(), true));
+        topology.add(new LayerDescription(ActivationSigmoid.class, 25, true));
+        topology.add(new LayerDescription(ActivationSigmoid.class, mlDataSet.getIdealSize(), false));
         propMLBuilder.withArchitecture(topology);
         
         NnFactory mlMethod = new BasicNetworkFactory();

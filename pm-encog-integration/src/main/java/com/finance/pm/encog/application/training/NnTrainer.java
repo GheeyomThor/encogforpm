@@ -12,7 +12,7 @@ import org.encog.ml.train.MLTrain;
 public interface NnTrainer {
 
     File train(MLTrain mlTrain, MLDataSet trainingSet,
-                String typeFeedforward, String modelArchitecture, String trainingType, String trainingArgs,
+                String methodType, String modelArchitecture, String trainingType, String trainingArgs,
                 String resultBaseFileName);
 
 }

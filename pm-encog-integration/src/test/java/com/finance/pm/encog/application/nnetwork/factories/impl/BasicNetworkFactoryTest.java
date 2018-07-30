@@ -34,9 +34,9 @@ public class BasicNetworkFactoryTest {
 
         // Given
         LinkedList<LayerDescription> topology = new LinkedList<>();
-        topology.add(new LayerDescription(22, ActivationSigmoid.class));
-        topology.add(new LayerDescription(44, ActivationSigmoid.class));
-        topology.add(new LayerDescription(2, ActivationSigmoid.class));
+        topology.add(new LayerDescription(ActivationSigmoid.class, 22, true));
+        topology.add(new LayerDescription(ActivationSigmoid.class, 44, true));
+        topology.add(new LayerDescription(ActivationSigmoid.class, 2, false));
 
         try {
             // When
