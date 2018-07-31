@@ -36,16 +36,15 @@ public class NetworkDescription {
 		//layer 3. 'TANH->?'	Activation==TANH,Count==default(outputWidth),Bias==false
 		//@see MethodConfig.class for other examples.
 		String rowArchitectureDescrString = (trainingParamsMap.containsKey("nnArchitecture"))?trainingParamsMap.get("nnArchitecture"):"?:B->TANH->f1.5:B->TANH->?"; //"?:B->TANH->"+ (int) hiddenLayerCount +":B->TANH->?";
-		Pattern p = Pattern.compile("f([0-9].[0.9])");
+		modelArchitecture = rowArchitectureDescrString;
+		Pattern p = Pattern.compile("f([0-9]\\.[0-9])");
 		Matcher matcher = p.matcher(rowArchitectureDescrString);
-		String nnModelArchitecture = null;
 		while (matcher.find()) {
-			double hiddenLayerFactor = Double.valueOf(matcher.group(1));
-			double hiddenLayerCount = ((double) (inputWidth*nnLagWindowSize + outputWidth*nnLeadWindowSize))*hiddenLayerFactor;
-			if (nnModelArchitecture == null) nnModelArchitecture = rowArchitectureDescrString.substring(0, matcher.start());
-			nnModelArchitecture = nnModelArchitecture + hiddenLayerCount;
+			String matchedGroup = matcher.group(1);
+			double hiddenLayerFactor = Double.valueOf(matchedGroup);
+			int hiddenLayerCount = (int) (((double) (inputWidth * nnLagWindowSize + outputWidth * nnLeadWindowSize)) * hiddenLayerFactor);
+			modelArchitecture = modelArchitecture.replaceFirst("f" + matchedGroup, hiddenLayerCount + "");
 		}
-		modelArchitecture = nnModelArchitecture + rowArchitectureDescrString.substring(matcher.end());
 
 		//	Others
 		methodType = (trainingParamsMap.containsKey("nnMethod"))?trainingParamsMap.get("nnMethod"):MLMethodFactory.TYPE_FEEDFORWARD; //MLMethodFactory.TYPE_FEEDFORWARD;
