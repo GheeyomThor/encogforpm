@@ -1,9 +1,8 @@
 package com.finance.pm.encog.application;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 public class NetworkDescriptionTest {
 
@@ -93,6 +92,27 @@ public class NetworkDescriptionTest {
         assertEquals("?:B->TANH->"+hiddenCount1+"->TANH->"+hiddenCount2+"->TANH->"+hiddenCount3+"->TANH->?", networkDescription.getModelArchitecture());
         assertEquals("myMethodIndeed", networkDescription.getMethodType());
         assertEquals("myTrainingTypeIndeed", networkDescription.getTrainingType());
+        assertEquals(trainArgs, networkDescription.getTrainingArgs());
+
+    }
+    
+    @Test
+    public void construct5() {
+        //Given
+        String trainArgs = "maxIterations=300";
+
+        //When
+        int inputWidth = 10;
+        int outputWidth = 1;
+        int nnLagWindowSize = 42;
+        int nnLeadWindowSize = 1;
+        NetworkDescription networkDescription = new NetworkDescription(trainArgs, inputWidth, outputWidth, nnLagWindowSize, nnLeadWindowSize);
+
+        //Then
+        int hiddenCount = (int) (((double)(inputWidth*nnLagWindowSize+outputWidth*nnLeadWindowSize))*1.5);
+        assertEquals("?:B->TANH->"+hiddenCount+":B->TANH->?", networkDescription.getModelArchitecture());
+        assertEquals("feedforward", networkDescription.getMethodType());
+        assertNull(networkDescription.getTrainingType());
         assertEquals(trainArgs, networkDescription.getTrainingArgs());
 
     }
