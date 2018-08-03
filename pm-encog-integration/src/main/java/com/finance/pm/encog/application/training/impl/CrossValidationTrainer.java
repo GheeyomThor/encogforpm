@@ -76,7 +76,7 @@ public class CrossValidationTrainer implements NnTrainer {
             report.finalModel(bestMethod);
 
             //Inputs sizes
-            report.sizes(dataSet.size(), model.getTrainingDataset().size(), model.getValidationDataset().size());
+            report.sizes(dataSet.size(), model.getTrainingDataset().size(), model.getValidationDataset().size(), dataSet.getInputSize(), dataSet.getIdealSize());
 
             String egPathName = System.getProperty("installdir") + File.separator + "neural" + File.separator + resultBaseFileName + ".EG";
             LOGGER.info("Saving training network in " + egPathName);

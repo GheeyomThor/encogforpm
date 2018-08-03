@@ -43,7 +43,7 @@ public class PropagationTrainer implements NnTrainer {
 			} while (mlTrain.getError() > THRESHOLD && epoch < maxIterations);
 
 			report.finalModel(mlTrain.getMethod());
-			report.print("Training input length (nb rows) : " + trainingSet.size());
+			report.print("Training input length (nb rows) : " + trainingSet.size() + ".Input width : " + trainingSet.getInputSize() + ", ideal width : " + trainingSet.getIdealSize());
 
 			File file = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + resultBaseFileName + ".EG");
 			EncogDirectoryPersistence.saveObject(file, mlTrain.getMethod());
