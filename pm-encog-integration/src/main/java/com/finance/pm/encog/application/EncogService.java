@@ -146,14 +146,14 @@ public class EncogService {
 			LOGGER.info("Encog "+resultsBaseFileName+". Cross Validation Training done.");
 			Encog.getInstance().shutdown();
 
-			if (LOGGER.isDebugEnabled()) exportNormalysed(trainingSet, resultsBaseFileName);
+			if (LOGGER.isDebugEnabled()) exportNormalised(trainingSet, resultsBaseFileName);
 
 			return prediction;
 		}
 
 	}
 
-	private void exportNormalysed(MLDataSet data, String baseFileName) {
+	private void exportNormalised(MLDataSet data, String baseFileName) {
 
 		LinkedHashMap<Integer, double[]> analysedInputs = new LinkedHashMap<>();
 		LinkedHashMap<Integer, double[]> analysedOutputs = new LinkedHashMap<>();
