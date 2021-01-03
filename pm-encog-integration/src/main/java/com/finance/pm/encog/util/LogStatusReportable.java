@@ -16,8 +16,10 @@ public class LogStatusReportable implements StatusReportable, Closeable {
     private static Logger LOGGER = Logger.getLogger(LogStatusReportable.class);
    
     private BufferedWriter bufferedWriter;
+	private String reference;
 
-    public LogStatusReportable(String resultBaseFileName) throws IOException {
+    public LogStatusReportable(String reference, String resultBaseFileName) throws IOException {
+    	this.reference = reference;
         File rFile = new File(System.getProperty("installdir") + File.separator + "neural" + File.separator + resultBaseFileName + ".txt");
         bufferedWriter = new BufferedWriter(new FileWriter(rFile));
     }
@@ -53,9 +55,9 @@ public class LogStatusReportable implements StatusReportable, Closeable {
     
     public void print(Object ... objects) {
         Arrays.asList(objects).stream().forEach( o -> {
-            LOGGER.info(o.toString());
+            LOGGER.info(reference + ": " + o.toString());
             try {
-                bufferedWriter.write(o.toString());
+                bufferedWriter.write(reference + ": " + o.toString());
                 bufferedWriter.newLine();
             } catch (IOException e) {
                 throw new RuntimeException(e);

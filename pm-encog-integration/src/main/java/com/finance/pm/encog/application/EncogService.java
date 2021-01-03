@@ -50,7 +50,7 @@ public class EncogService {
 	private CsvImportExport<Integer> normalizedExporter;
 
 	@Inject
-	public EncogService( 
+	public EncogService(
 			NnFactory networkFactory, PropagationFactory propagationFactory, 
 			@Temporal DataSetLoader oneFoldTemporalDataLoader,
 			@Named("temporal") NnTrainer oneFoldTrainer,
@@ -90,12 +90,13 @@ public class EncogService {
 	 * @return The predicted output
 	 * @throws Exception
 	 */
-	public List<double[]> oneFoldTrainAndCompute(InputOutputDescription iODescription, NetworkDescription networkDescription, String resultsBaseFileName)
+	public List<double[]> oneFoldTrainAndPredict(InputOutputDescription iODescription, NetworkDescription networkDescription, String resultsBaseFileName)
 			throws Exception {
 
 		synchronized(EncogService.class) {
 			LOGGER.info("Importing data");
-			MLDataSet trainingSet = oneFoldTemporalDataLoader.loadData(iODescription.getInputType(), iODescription.getOutputType(), iODescription.getLagWindowSize(), iODescription.getLeadWindowSize());
+			MLDataSet trainingSet = oneFoldTemporalDataLoader
+					.loadData(iODescription.getInputType(), iODescription.getOutputType(), iODescription.getLagWindowSize(), iODescription.getLeadWindowSize());
 
 			String egPath = System.getProperty("installdir") + File.separator + "neural" + File.separator + resultsBaseFileName+".EG";
 			File trainedEg = new File(egPath);
@@ -111,11 +112,14 @@ public class EncogService {
 				MLTrain mlTrain = new PropagationTrainingBuilder().withDataSet(trainingSet).withTrainingSpecification(trainingSpec).build();
 
 				LOGGER.info("Training network ...");
-				trainedEg = oneFoldTrainer.train(mlTrain, trainingSet, null, null, null, networkDescription.getTrainingArgs(), resultsBaseFileName);
+				trainedEg = oneFoldTrainer.train(mlTrain, trainingSet, null, null, null, networkDescription.getTrainingArgs(), iODescription.getReference(), resultsBaseFileName);
 			}
 
+			MLDataSet validationSet = oneFoldTemporalDataLoader
+					.loadData(iODescription.getInputType(), iODescription.getOutputType(), iODescription.getLagWindowSize(), 0);
+
 			LOGGER.info("Running predictions");
-			List<double[]> prediction = oneFoldPredictor.compute(trainedEg, trainingSet);
+			List<double[]> prediction = oneFoldPredictor.compute(trainedEg, validationSet);
 
 			LOGGER.info("Encog. One fold Training done.");
 			Encog.getInstance().shutdown();
@@ -125,7 +129,7 @@ public class EncogService {
 
 	}
 
-	public List<double[]> crossTrainAndCompute(
+	public List<double[]> crossTrainAndPredict(
 			InputOutputDescription iODescr, NetworkDescription netDescr,
 			String resultsBaseFileName) throws Exception {
 
@@ -138,10 +142,10 @@ public class EncogService {
 					.loadData(iODescr.getInputType(), iODescr.getOutputType(), iODescr.getLagWindowSize(), iODescr.getLeadWindowSize(), netDescr.getMethodType(), netDescr.getModelArchitecture());
 
 			LOGGER.info("Training network using cross validation and find the best method");
-			File trainedEg = crossValidationTrainer.train(null, trainingSet, netDescr.getMethodType(), netDescr.getModelArchitecture(), netDescr.getTrainingType(), netDescr.getTrainingArgs(), resultsBaseFileName);
+			File trainedEg = crossValidationTrainer.train(null, trainingSet, netDescr.getMethodType(), netDescr.getModelArchitecture(), netDescr.getTrainingType(), netDescr.getTrainingArgs(), iODescr.getReference(), resultsBaseFileName);
 
 			LOGGER.info("Running predictions");
-			List<double[]> prediction = crossValidationPredictor.versatileDataSetCompute(trainedEg, trainingSet.getNormHelper(), iODescr.getLagWindowSize());
+			List<double[]> prediction = crossValidationPredictor.versatileDataSetPredict(trainedEg, trainingSet.getNormHelper(), iODescr.getLagWindowSize());
 
 			LOGGER.info("Encog "+resultsBaseFileName+". Cross Validation Training done.");
 			Encog.getInstance().shutdown();
@@ -168,7 +172,7 @@ public class EncogService {
 	}
 
 
-	public List<double[]> optionalCrossTrainAndCompute(InputOutputDescription iODescription, NetworkDescription networkDescription, String resultsBaseFileName) throws Exception {
+	public List<double[]> optimumCrossTrainAndPredict(InputOutputDescription iODescription, NetworkDescription networkDescription, String resultsBaseFileName) throws Exception {
 
 		synchronized(EncogService.class) {
 			List<double[]> prediction;
@@ -185,7 +189,7 @@ public class EncogService {
 					NormalizationHelper normHelper = (NormalizationHelper) objectInputStream.readObject();
 
 					LOGGER.info("Running predictions");
-					prediction = crossValidationPredictor.versatileDataSetCompute(trainedEg, normHelper, iODescription.getLagWindowSize());
+					prediction = crossValidationPredictor.versatileDataSetPredict(trainedEg, normHelper, iODescription.getLagWindowSize());
 
 				} catch (Exception e) {
 					throw new RuntimeException(e);
@@ -194,7 +198,7 @@ public class EncogService {
 			} else {
 
 				LOGGER.info("File "+trainedEg.getAbsolutePath()+" was NOT found on the file system : retraining");
-				prediction = crossTrainAndCompute(iODescription, networkDescription, resultsBaseFileName);
+				prediction = crossTrainAndPredict(iODescription, networkDescription, resultsBaseFileName);
 
 			}
 

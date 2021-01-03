@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.encog.ml.data.versatile.columns.ColumnType;
 
 public class InputOutputDescription {
+	private String reference;
 	private String method;
 	private ColumnType inputType;
 	private ColumnType outputType;
@@ -17,13 +18,18 @@ public class InputOutputDescription {
 	private Integer leadWindowSize;
 	private String[] ioCalculationParams;
 
-	public InputOutputDescription(String method, ColumnType inputType, ColumnType outputType, Integer lagWindowSize, Integer leadWindowSize, String... ioCalculationParams) {
+	public InputOutputDescription(String reference, String method, ColumnType inputType, ColumnType outputType, Integer lagWindowSize, Integer leadWindowSize, String... ioCalculationParams) {
+		this.reference = reference;
 		this.method = method;
 		this.inputType = inputType;
 		this.outputType = outputType;
 		this.lagWindowSize = lagWindowSize;
 		this.leadWindowSize = leadWindowSize;
 		this.ioCalculationParams = ioCalculationParams;
+	}
+	
+	public String getReference() {
+		return reference;
 	}
 
 	public ColumnType getInputType() {
@@ -44,8 +50,7 @@ public class InputOutputDescription {
 
 	@Override
 	public String toString() {
-		return String.format(
-				"InputOutputDescription [method=%s, ioCalculationParams=%s]", method, Arrays.toString(ioCalculationParams));
+		return String.format("InputOutputDescription [method=%s, ioCalculationParams=%s]", method, Arrays.toString(ioCalculationParams));
 	}
 
 	public String toEntry() {

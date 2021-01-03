@@ -13,6 +13,6 @@ public interface NnTrainer {
 
     File train(MLTrain mlTrain, MLDataSet trainingSet,
                 String methodType, String modelArchitecture, String trainingType, String trainingArgs,
-                String resultBaseFileName);
+                String reference, String resultBaseFileName);
 
 }

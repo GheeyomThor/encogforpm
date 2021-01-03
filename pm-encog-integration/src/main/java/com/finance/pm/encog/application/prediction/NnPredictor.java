@@ -28,7 +28,7 @@ public interface NnPredictor {
      */
 	List<double[]> compute(File trainedEg, MLDataSet trainingSet);
     
-    List<double[]> versatileDataSetCompute(File trainedEg, NormalizationHelper normHelper, int lagWindowSize);
+    List<double[]> versatileDataSetPredict(File trainedEg, NormalizationHelper normHelper, int lagWindowSize);
 
     /**
      * Classification prediction

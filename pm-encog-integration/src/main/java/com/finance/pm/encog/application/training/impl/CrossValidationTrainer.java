@@ -28,13 +28,13 @@ public class CrossValidationTrainer implements NnTrainer {
     @Override
     public File train(MLTrain mlTrain, MLDataSet trainingSet, 
             String methodType, String modelArchitecture, String trainingType, String trainingArgs, 
-            String resultBaseFileName) {
+            String reference, String resultBaseFileName) {
 
         VersatileMLDataSet dataSet = (VersatileMLDataSet) trainingSet;
 
         EncogModel model = new EncogModel(dataSet);
 
-        try (LogStatusReportable report = new LogStatusReportable(resultBaseFileName)) {
+        try (LogStatusReportable report = new LogStatusReportable(reference, resultBaseFileName)) {
 
             // Send any output to the console.
             model.setReport(report);

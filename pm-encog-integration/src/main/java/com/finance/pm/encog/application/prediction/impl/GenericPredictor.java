@@ -34,7 +34,7 @@ public class GenericPredictor implements NnPredictor {
     }
 
     @Override
-    public List<double[]> versatileDataSetCompute(File trainedEg, NormalizationHelper normHelper, int lagWindowSize) {
+    public List<double[]> versatileDataSetPredict(File trainedEg, NormalizationHelper normHelper, int lagWindowSize) {
         throw new UnsupportedOperationException();
     }
 

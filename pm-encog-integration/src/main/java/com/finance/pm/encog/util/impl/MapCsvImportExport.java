@@ -57,28 +57,38 @@ public class MapCsvImportExport implements CsvImportExport<Date> {
         }
 
     }
-
+    
     @Override
     public SortedMap<Date, double[]> importData(File exportFile) {
+    	return importData(exportFile, new ArrayList<>());
+    }
+
+    @Override
+    public SortedMap<Date, double[]> importData(File exportFile, List<String> headers) {
 
         SortedMap<Date, double[]> map = new TreeMap<>();
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(exportFile))) {
 
             SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
-
             String line;
             int prevLength = 0;
+
             while ((line = bufferedReader.readLine()) != null) {
+            	
                 String[] rowSplit = line.split(",");
+                if (headers.isEmpty()) headers.addAll(Arrays.asList(rowSplit));
+                
+                //file check
+                if (prevLength > 0 && prevLength != rowSplit.length) throw new RuntimeException("Invalid file");
+                
                 try {
-                    //file check
-                    if (prevLength > 0 && prevLength != rowSplit.length) throw new RuntimeException("Invalid file");
                     prevLength = rowSplit.length;
                     
                     //entry creation
-                    double[] array = Arrays.asList(rowSplit).subList(1, rowSplit.length)
-                                            .stream().mapToDouble(x -> (x.isEmpty())?Double.NaN:Double.valueOf(x)).toArray();
+                    double[] array =
+                    		Arrays.asList(rowSplit).subList(1, rowSplit.length).stream()
+                    		.mapToDouble(x -> (x.isEmpty())?Double.NaN:Double.valueOf(x)).toArray();
                     map.put(dateFormatter.parse(rowSplit[0]), array);
                 } catch (Exception e) {
                     LOGGER.warn("Unreadable line in "+exportFile.getAbsolutePath()+" : "+line + ". Cause: " + e);

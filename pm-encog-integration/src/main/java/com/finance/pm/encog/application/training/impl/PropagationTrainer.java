@@ -27,18 +27,18 @@ public class PropagationTrainer implements NnTrainer {
 	@Override
 	public File train(MLTrain mlTrain, MLDataSet trainingSet,
 			String modelMethod, String modelArchitecture, String trainingType, String trainingArgs,
-			String resultBaseFileName) {
+			String reference, String resultBaseFileName) {
 
 		Map<String, String> trainingArgsMap = parseTrainingArgs(trainingArgs);
 
-		try (LogStatusReportable report = new LogStatusReportable(resultBaseFileName)) {
+		try (LogStatusReportable report = new LogStatusReportable(reference, resultBaseFileName)) {
 
 			int maxIterations = (trainingArgsMap.containsKey("maxIterations"))?Integer.valueOf(trainingArgsMap.get("maxIterations")):MAX_ITERATIONS;
 
 			int epoch = 1;
 			do {
 				mlTrain.iteration();
-				report.print("Iteration #"+epoch+", Training Error: "+mlTrain.getError());
+				report.print("Iteration #" + epoch + ", Training Error: " + mlTrain.getError());
 				epoch++;
 			} while (mlTrain.getError() > THRESHOLD && epoch < maxIterations);
 
