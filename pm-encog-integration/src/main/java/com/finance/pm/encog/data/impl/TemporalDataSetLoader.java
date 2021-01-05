@@ -36,7 +36,7 @@ public class TemporalDataSetLoader implements DataSetLoader {
 
 	@Override
 	public TemporalMLDataSet loadData(
-			ColumnType inputColumnType, ColumnType outputColumnType, 
+			ColumnType inputColumnType, ColumnType outputColumnType,
 			int lagWindowSize, int leadWindowSize,
 			String modelType, String modelArchitecture) {
 
@@ -63,24 +63,26 @@ public class TemporalDataSetLoader implements DataSetLoader {
 		temporalMLDataSet.addDescription(desc);
 
 		// Creating the Temporal points for each input vector and its ideal.
-		int nbOutputEntries = (int) trainingIdealValues.stream().filter(v -> !Double.isNaN(v[0])).count() - lagWindowSize;
+		int nbOutputEntries = trainingIdealValues.size() - lagWindowSize;
 		int nbInputEntries = trainingInputValues.size() - lagWindowSize - idealShift;
-		
-		double trainFoldsRatio = pmDataAdapter.getTrainFoldsRatio();
-		int nbTrainingInputEntries = (int) Math.min(nbOutputEntries, (long) (((double) nbInputEntries)*trainFoldsRatio));
-		
+		LOGGER.info("Number of usable inputs: " + nbInputEntries + ". Number of usable ideals: " + nbOutputEntries + ".");
+
 		List<Date> inputsDatesList = pmDataAdapter.getTrainingInputsDatesList();
-		int maxIterations;
+		LOGGER.info("Trainig inputs keys span: from " + inputsDatesList.get(0) + " to " + inputsDatesList.get(inputsDatesList.size()-1));
+		int maxIterationsIdealShift;
 		if (leadWindowSize == 0) { //Validation set
-			LOGGER.info("Validation fold only: from " + inputsDatesList.get(lagWindowSize)+" to " + inputsDatesList.get(lagWindowSize + nbInputEntries-1 + idealShift));
-			maxIterations = nbInputEntries + idealShift + lagWindowSize;
+			LOGGER.info("Validation fold only: from " + inputsDatesList.get(lagWindowSize)+" to " + inputsDatesList.get(nbInputEntries + lagWindowSize + idealShift -1));
+			maxIterationsIdealShift = nbInputEntries + lagWindowSize + idealShift;
 		} else { //Training set
-			LOGGER.info("Training fold: from " + inputsDatesList.get(lagWindowSize)+" to " + inputsDatesList.get(lagWindowSize + nbTrainingInputEntries -1));
-			maxIterations = nbOutputEntries + idealShift + lagWindowSize;
+			double trainFoldsRatio = pmDataAdapter.getTrainFoldsRatio();
+			int nbTrainingInputEntries = (int) Math.min(nbOutputEntries, (long) (((double) nbInputEntries)*trainFoldsRatio));
+			LOGGER.info("Number of training inputs: " + nbTrainingInputEntries + ".");
+			LOGGER.info("Training fold: from " + inputsDatesList.get(lagWindowSize) + " to " + inputsDatesList.get(nbTrainingInputEntries + lagWindowSize + idealShift -1));
+			maxIterationsIdealShift = nbTrainingInputEntries + lagWindowSize + idealShift;
 		}
 
 		// Note the shift idealShift in trainingIdealValues: The temporal dataSet (generate) will take lagWindowSize inputs from 0 and leadWindowSize outputs from 1 (shift 1)
-		for (int dateIndex = idealShift; dateIndex < maxIterations; dateIndex++) {
+		for (int dateIndex = idealShift; dateIndex < maxIterationsIdealShift; dateIndex++) {
 
 			TemporalPoint point = new TemporalPoint(temporalMLDataSet.getDescriptions().size());
 			point.setSequence(dateIndex-idealShift);
@@ -97,7 +99,7 @@ public class TemporalDataSetLoader implements DataSetLoader {
 			if (leadWindowSize > 0) { //Training data
 				// At this stage we only are interested by one value for the output
 				double oneOutputColumn = trainingIdealValues.get(dateIndex-idealShift)[0];
-				if (Double.isNaN(oneOutputColumn)) throw new RuntimeException("Invalid input: " + Arrays.toString(trainingIdealValues.get(dateIndex-1)));
+				if (Double.isNaN(oneOutputColumn)) throw new RuntimeException("Invalid ideal: " + Arrays.toString(trainingIdealValues.get(dateIndex-1)));
 				point.setData(inputData.length, oneOutputColumn);
 			}
 
@@ -107,14 +109,17 @@ public class TemporalDataSetLoader implements DataSetLoader {
 
 		TemporalPoint additionnalPointToWorkArroundTheIdealShift = new TemporalPoint(temporalMLDataSet.getDescriptions().size());
 		additionnalPointToWorkArroundTheIdealShift.setData(temporalMLDataSet.getPoints().get(temporalMLDataSet.getPoints().size()-1).getData());
-		additionnalPointToWorkArroundTheIdealShift.setSequence(maxIterations-idealShift);
+		additionnalPointToWorkArroundTheIdealShift.setSequence(maxIterationsIdealShift-idealShift);
 		temporalMLDataSet.getPoints().add(additionnalPointToWorkArroundTheIdealShift);
-		
+
 		temporalMLDataSet.generate();
 
-		//if (LOGGER.isDebugEnabled()) 
+		if (LOGGER.isDebugEnabled()) 
 			TemporalMLDataSet.toList(temporalMLDataSet).stream().forEach(pair -> LOGGER.info(Arrays.toString(pair.getInputArray()) + " -> " + Arrays.toString(pair.getIdealArray())));
 
+		LOGGER.info("DataSet input size: "+ temporalMLDataSet.getData().size());
+		LOGGER.info("DataSet first pair: " + Arrays.toString(temporalMLDataSet.getData().get(0).getInputArray()) + " -> " + Arrays.toString(temporalMLDataSet.getData().get(0).getIdealArray()));
+		LOGGER.info("DataSet last pair: " + Arrays.toString(temporalMLDataSet.getData().get(temporalMLDataSet.getData().size()-1).getInputArray()) + " -> " + Arrays.toString(temporalMLDataSet.getData().get(temporalMLDataSet.getData().size()-1).getIdealArray()));
 		return temporalMLDataSet;
 
 	}
